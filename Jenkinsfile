@@ -4,7 +4,7 @@ node() {
     def err = null
     currentBuild.result = "SUCCESS"
 
-    timestamps {
+
 
         try {
 
@@ -67,5 +67,5 @@ node() {
             throw error
 
         }
-        }
+        
     }
