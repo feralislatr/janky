@@ -93,9 +93,6 @@ node('master'){
 							        	} catch (err) {}
 				                			sh "git checkout -b temp2"
 				        				    sh "git merge origin/$target_branch"
-				        				    sh "git commit -am'hi commit pls'"
-				        				    sh "git push origin $target_branch"
-				        				    echo "hi i push" 
 
 						            		//This needs to become dynamic
 						            		sh("curl -XPOST -d '{\"state\": \"success\", \"context\": \"continuous-integration/jenkins/branch\"}' https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/api/v3/repos/reza-pipeline/test-sample-1/statuses/${git_sha}")
@@ -112,7 +109,7 @@ node('master'){
 			         			checkout scm
 			         		stage 'Build the code'
 			         		stage 'Run the Unit tests'
-			         		//	wat tests
+			         		
 			         	}
 		      	} catch (err) {
 		        	print "An error happened:"
