@@ -93,6 +93,7 @@ node('master'){
 							        	} catch (err) {}
 				                			sh "git checkout -b temp2"
 				        				    sh "git merge origin/$target_branch"
+				        				    echo "um hello?"
 				        				    sh "git push origin $target_branch"
 				        				    echo "hi i push" 
 
@@ -111,7 +112,7 @@ node('master'){
 			         			checkout scm
 			         		stage 'Build the code'
 			         		stage 'Run the Unit tests'
-			         		//	wat tests
+	
 			         	}
 		      	} catch (err) {
 		        	print "An error happened:"
