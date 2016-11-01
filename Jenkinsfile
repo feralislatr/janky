@@ -29,8 +29,10 @@ node('master'){
 			       
 			       	stage 'Build the code'
 			       	stage 'Get Variables'
-			       		def repo_name = env.JOB_NAME.split('/')
-			       		print repo_name
+			       		def repoNameRegex = ".+/(.+)/.+"
+                  		def repo_name = (env.JOB_NAME =~ repoNameRegex)[0][1]
+						echo repo_name
+			       		
 			       		//Get variables from marketplace
 			       		def env_param = ""
 			       		if (target_branch!=null){
