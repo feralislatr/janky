@@ -21,9 +21,6 @@ node('master'){
 			        	def target_branch = env.CHANGE_TARGET
 			        stage 'Test Mergeability'
 			        //Test to see if code can be merged automatically
-			        //try to see variables
-			        echo "env variables"
-			        sh 'env | sort'
 			        	try {
 			        		sh "git branch -D temp"
 			        	} catch (err) {}
@@ -32,6 +29,9 @@ node('master'){
 			       
 			       	stage 'Build the code'
 			       	stage 'Get Variables'
+			       		//Get env variables
+			       		def repo_name = env.JOB_NAME.split('/')
+			       		print repo_name
 			       		//Get variables from marketplace
 			       		def env_param = ""
 			       		if (target_branch!=null){
@@ -65,6 +65,7 @@ node('master'){
 							        		sh "git branch -D temp2"
 							        	} catch (err) {}
 				                			sh "git checkout $target_branch"
+				                			sh "git pull"
 				                			sh "cat README.md"
 											sh "git merge --no-ff temp2" //<<- origin branch
 											sh "cat README.md"
@@ -154,10 +155,9 @@ def deploy(String env_param, String github_pull_req) {
 }
 
 //Run docker tag and build scripts with respect to deploy environments
-def push(String env_param, String git_sha) {
-	placeholder = env.JOB_NAME.split('/')
+def push(String env_param, String git_sha, String repo_name) {
     //def repo_name = placeholder[1]
-    def repo_name = 'blueocean'
+    //def repo_name = 'blueocean'
     print repo_name
     if (fileExists('pom.xml')){			//remove
     	print 'Building the JAR file.' //remove
