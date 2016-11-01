@@ -56,7 +56,6 @@ node('master'){
 					        	//If pull request is to development, only deploy to comp envrionment
 					        	if (target_branch == 'development'){
 					        		env_param = 'comp'
-					        		echo "hello hi i am env: $env_param"
 									stage 'Comp Approval'
 						             		askApproval(env_param, lambda_url, jenkins_pr_url, github_pull_req)
 						          	stage 'Build a Docker Image for Component environment'
@@ -96,11 +95,13 @@ node('master'){
 						                 	deploy(env_param, github_pull_req)
 						           	stage 'Ready to merge'
 							           	//Final merge of deployed code
+							           	sh "cat README.md"
 								        try {
 							        		sh "git branch -D temp2"
 							        	} catch (err) {}
 				                			sh "git checkout $target_branch"
-											sh "git merge --no-ff temp2" //<<- origin branch
+				                			sh "cat README.md"
+											//sh "git merge --no-ff temp2" //<<- origin branch
 											sh "git push origin $target_branch"
 
 						            		//This needs to become dynamic
