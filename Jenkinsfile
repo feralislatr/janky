@@ -29,8 +29,8 @@ node('master'){
 			       
 			       	stage 'Build the code'
 			       	stage 'Get Variables'
-			       		def reporegex = ".+/(.+)/.+"
-                  		def repo_name = (env.JOB_NAME =~ reporegex)[0][1]
+			       		def placeholder = ".+/(.+)/.+"
+                  		def repo_name = (env.JOB_NAME =~ placeholder)[0][1]
 						echo repo_name
 			       		
 			       		//Get variables from marketplace
@@ -135,8 +135,7 @@ node('master'){
 
 //Run docker deploy script 
 def deploy(String env_param, String github_pull_req, String repo_name) {
-   //def repo_name = placeholder[1]
-   //don't hardcode this
+   placeholder = env.JOB_NAME.split('/')
    //def repo_name = 'blueocean'
    def marketplace_url="http://marketplace-app-03.east1a.dev:3000/api/paas/docker/compose"
    def marketplace_prefix="app_env=${env_param}\\&repo_name=${placeholder[0]}/${repo_name}"
