@@ -29,7 +29,7 @@ node('master'){
 			       
 			       	stage 'Build the code'
 			       	stage 'Get Variables'
-			       		def placeholder = ".+/(.+)/.+"
+			       		placeholder = ".+/(.+)/.+"
                   		def repo_name = (env.JOB_NAME =~ placeholder)[0][1]
 						echo repo_name
 			       		
