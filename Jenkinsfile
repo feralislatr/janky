@@ -19,15 +19,14 @@ node('master'){
 			
 			       	stage 'Detemining a Target Branch'
 			        	def target_branch = env.CHANGE_TARGET
-			        stage 'Test Mergeability'
-			        //Test to see if code can be merged automatically
+			        stage 'Merge'
+			        //Merge Code
 			        	try {
 			        		sh "git branch -D temp"
 			        	} catch (err) {}
 			        	    sh "git checkout -b temp"
         				    sh "git merge --no-ff origin/$target_branch"
-			       
-			       	stage 'Build the code'
+	
 			       	stage 'Get Variables'
 			       	sh "env | sort"
 			       		def placeholder = ".+/(.+)/.+"
@@ -61,11 +60,6 @@ node('master'){
 							             	push(env_param, git_sha, repo_name)
 						            stage 'Deploy To Component Environment'
 							            	deploy(env_param, github_pull_req, repo_name)
-								        //Merge
-				                			sh "git checkout $target_branch"
-				                			//sh "git diff origin/$target_branch temp"
-											sh "git merge --no-ff temp"
-											sh "git push origin $target_branch"
 
 				        		//If pull request is to the master branch, deploy to minc, prodlike, or prod
 								} else if (target_branch == 'master'){ //case
@@ -92,23 +86,14 @@ node('master'){
 						               		push(env_param, git_sha, repo_name)
 						               	stage "Deploy to Production"
 						                 	deploy(env_param, github_pull_req, repo_name)
-						           	stage 'Ready to merge'
-							           	//Final merge of deployed code
-								        try {
-							        		sh "git branch -D temp2"
-							        	} catch (err) {}
-				                			sh "git checkout $target_branch"
-											sh "git merge --no-ff temp2" //<<- origin branch
-											sh "git push origin $target_branch"
-
-						            		//This needs to become dynamic
-						            		sh("curl -XPOST -d '{\"state\": \"success\", \"context\": \"continuous-integration/jenkins/branch\"}' https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/api/v3/repos/reza-pipeline/test-sample-1/statuses/${git_sha}")
+						           			
 					           	}
 							} catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException err) {
 					        	print "Error I am in the "
 					           	sh("curl -XPOST -H 'Content-Type: application/json' -d '{\"body\": \"CI/CD could not finish the deployment process because it has been **Aborted**.\"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
 					            	throw err
-					       		}	
+					       		}
+
 			         	} else { //feature branch
 			         		stage 'Test a Push'
 			           		print "Run some test"
@@ -119,10 +104,26 @@ node('master'){
 			         		//unit tests run by Dockerfile
 			         	}
 		      	} catch (err) {
-		        	print "An error happened:"
+		        	print "An error occurred:"
 		     		print err
 		        	sh("curl -XPOST -H 'Content-Type: application/json' -d '{\"body\": \"CI/CD could not finish the deployment process because the of the following error: <br > ${err} \"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
 		      	}
+
+		    //Push merged code after deployment
+			step 'Merge Pull Request'
+	            sh "git checkout $target_branch"
+	            // sh "git merge --no-ff temp"
+	            sh "git remote set-url origin https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/Pipeline/blueocean-ui-service-reza.git"
+	            //credentials need to be updated
+	            //sh "git remote set-url origin https://brianaslaterADM:144ce55e20843484ef8a84f774df5088ca72dd83@csp-github.micropaas.io/${repo_name}.git"
+	            sh "git remote -v"
+	            sh "git status"
+	            sh "git pull"
+	            sh "git push origin $target_branch"
+
+	            //This needs to become dynamic
+				sh("curl -XPOST -d '{\"state\": \"success\", \"context\": \"continuous-integration/jenkins/branch\"}' https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/api/v3/repos/reza-pipeline/test-sample-1/statuses/${git_sha}")
+
 		}
     	}
 	//sh('printenv')
