@@ -29,6 +29,7 @@ node('master'){
 			       
 			       	stage 'Build the code'
 			       	stage 'Get Variables'
+			       	sh "env | sort"
 			       		def placeholder = ".+/(.+)/.+"
                   		def repo_name = (env.JOB_NAME =~ placeholder)[0][1]
 						echo repo_name
@@ -61,15 +62,9 @@ node('master'){
 						            stage 'Deploy To Component Environment'
 							            	deploy(env_param, github_pull_req, repo_name)
 								        //Merge
-								        sh "cat README.md"
-								        // try {
-							        	// 	//sh "git branch -D temp2"
-							        	// } catch (err) {}
 				                			sh "git checkout $target_branch"
-				                			sh "cat README.md"
-				                			sh "git diff origin/$target_branch temp"
-											sh "git merge --no-ff temp" //<<- origin branch
-											sh "cat README.md"
+				                			//sh "git diff origin/$target_branch temp"
+											sh "git merge --no-ff temp"
 											sh "git push origin $target_branch"
 
 				        		//If pull request is to the master branch, deploy to minc, prodlike, or prod
