@@ -62,13 +62,13 @@ node('master'){
 							            	deploy(env_param, github_pull_req, repo_name)
 								        //Merge
 								        sh "cat README.md"
-								        try {
-							        		sh "git branch -D temp2"
-							        	} catch (err) {}
+								        // try {
+							        	// 	//sh "git branch -D temp2"
+							        	// } catch (err) {}
 				                			sh "git checkout $target_branch"
 				                			sh "cat README.md"
-				                			sh "git diff origin/$target_branch temp2"
-											sh "git merge --no-ff temp2" //<<- origin branch
+				                			sh "git diff origin/$target_branch temp"
+											sh "git merge --no-ff temp" //<<- origin branch
 											sh "cat README.md"
 											sh "git push origin $target_branch"
 
