@@ -19,6 +19,10 @@ node('master'){
 			
 			       	stage 'Detemining a Target Branch'
 			        	def target_branch = env.CHANGE_TARGET
+
+			        	def repogex = ".+/(.+)/.+"
+                  		String repo_name = (env.JOB_NAME =~ repogex)[0][1]
+						echo repo_name
 			        stage 'Merge'
 			        //Merge Code
 			        	try {
@@ -30,9 +34,9 @@ node('master'){
 	
 			       	stage 'Get Variables'
 			       	sh "env | sort"
-			       		def repogex = ".+/(.+)/.+"
-                  		String repo_name = (env.JOB_NAME =~ repogex)[0][1]
-						echo repo_name
+			   //     		def repogex = ".+/(.+)/.+"
+      //             		String repo_name = (env.JOB_NAME =~ repogex)[0][1]
+						// echo repo_name
 			       		
 			       		//Get variables from marketplace
 			       		def env_param = ""
@@ -164,28 +168,8 @@ def push(String env_param, String git_sha, repo_name) {
 
 
 //Run docker deploy script 
-def deploy(String env_param, String github_pull_req, String repo_name) {
-   //placeholder = env.JOB_NAME.split('/')
-   //def repo_name = 'blueocean'
-   def marketplace_url="http://marketplace-app-03.east1a.dev:3000/api/paas/docker/compose"
-   def marketplace_prefix="app_env=${env_param}\\&repo_name=${placeholder[0]}/${repo_name}"
-   print marketplace_prefix
-   sh ("/bin/bash /var/lib/jenkins/scripts/docker-compose-deploy-ucp-pipeline-reza.sh ${env_param} ${repo_name} ${marketplace_url} ${marketplace_prefix}")
-   
-   if(env_param == 'comp') {
-   	sh("curl -XPOST -H 'Content-Type: application/json' -d '{\"body\": \"Your service has been deployed to the **Component** Environment\"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
-   } else if(env_param == 'minc') {
-   	sh("curl -XPOST -H 'Content-Type: application/json' -d '{\"body\": \"Your service has been deployed to the **Minimum-Capacity** Environment\"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
-   } else if(env_param == 'prodlike') { 
-   	sh("curl -XPOST -H 'Content-Type: application/json' -d '{\"body\": \"Your service has been deployed to the **Production Like** Environment\"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
-   } else if(env_param == 'prod') {
-   	sh("curl -XPOST -H 'Content-Type: application/json' -d '{\"body\": \"Your service has been deployed to the **Production** Environment\"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
-   }
-}
-
-//deploy function from master
 // def deploy(String env_param, String github_pull_req, String repo_name) {
-//    //def repo_name = placeholder[1]
+//    //placeholder = env.JOB_NAME.split('/')
 //    //def repo_name = 'blueocean'
 //    def marketplace_url="http://marketplace-app-03.east1a.dev:3000/api/paas/docker/compose"
 //    def marketplace_prefix="app_env=${env_param}\\&repo_name=${placeholder[0]}/${repo_name}"
@@ -196,12 +180,32 @@ def deploy(String env_param, String github_pull_req, String repo_name) {
 //    	sh("curl -XPOST -H 'Content-Type: application/json' -d '{\"body\": \"Your service has been deployed to the **Component** Environment\"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
 //    } else if(env_param == 'minc') {
 //    	sh("curl -XPOST -H 'Content-Type: application/json' -d '{\"body\": \"Your service has been deployed to the **Minimum-Capacity** Environment\"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
-//    } else if(env_param == 'prodlike') {
+//    } else if(env_param == 'prodlike') { 
 //    	sh("curl -XPOST -H 'Content-Type: application/json' -d '{\"body\": \"Your service has been deployed to the **Production Like** Environment\"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
 //    } else if(env_param == 'prod') {
 //    	sh("curl -XPOST -H 'Content-Type: application/json' -d '{\"body\": \"Your service has been deployed to the **Production** Environment\"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
 //    }
 // }
+
+//deploy function from master
+def deploy(String env_param, String github_pull_req, String repo_name) {
+   //def repo_name = placeholder[1]
+   //def repo_name = 'blueocean'
+   def marketplace_url="http://marketplace-app-03.east1a.dev:3000/api/paas/docker/compose"
+   def marketplace_prefix="app_env=${env_param}\\&repo_name=${placeholder[0]}/${repo_name}"
+   print marketplace_prefix
+   sh ("/bin/bash /var/lib/jenkins/scripts/docker-compose-deploy-ucp-pipeline-reza.sh ${env_param} ${repo_name} ${marketplace_url} ${marketplace_prefix}")
+   
+   if(env_param == 'comp') {
+   	sh("curl -XPOST -H 'Content-Type: application/json' -d '{\"body\": \"Your service has been deployed to the **Component** Environment\"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
+   } else if(env_param == 'minc') {
+   	sh("curl -XPOST -H 'Content-Type: application/json' -d '{\"body\": \"Your service has been deployed to the **Minimum-Capacity** Environment\"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
+   } else if(env_param == 'prodlike') {
+   	sh("curl -XPOST -H 'Content-Type: application/json' -d '{\"body\": \"Your service has been deployed to the **Production Like** Environment\"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
+   } else if(env_param == 'prod') {
+   	sh("curl -XPOST -H 'Content-Type: application/json' -d '{\"body\": \"Your service has been deployed to the **Production** Environment\"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
+   }
+}
 
 //Display input steps that ask the user to approve or abort a deployment to each environment
 def askApproval(String env_param, String lambda_url, String jenkins_pr_url, String github_pull_req) {
