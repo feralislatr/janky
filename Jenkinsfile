@@ -199,7 +199,9 @@ def deploy(String env_param, String github_pull_req) {
    print marketplace_prefix
    echo "where is problem4"
    sh ("/bin/bash /var/lib/jenkins/scripts/docker-compose-deploy-ucp-pipeline-reza.sh ${env_param} ${repo_name} ${marketplace_url} ${marketplace_prefix}")
-   
+   echo "where is problem5"
+
+
    if(env_param == 'comp') {
    	sh("curl -XPOST -H 'Content-Type: application/json' -d '{\"body\": \"Your service has been deployed to the **Component** Environment\"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
    } else if(env_param == 'minc') {
