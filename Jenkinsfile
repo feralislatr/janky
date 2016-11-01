@@ -65,7 +65,7 @@ node('master'){
 							        		sh "git branch -D temp2"
 							        	} catch (err) {}
 				                			sh "git checkout $target_branch"
-				                			sh "git pull"
+				                			//sh "git pull"
 				                			sh "cat README.md"
 											sh "git merge --no-ff temp2" //<<- origin branch
 											sh "cat README.md"
