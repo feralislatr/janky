@@ -29,15 +29,15 @@ node('master'){
 	
 			       	stage 'Get Variables'
 			       	sh "env | sort"
-			       		def placeholder = ".+/(.+)/.+"
-                  		def repo_name = (env.JOB_NAME =~ placeholder)[0][1]
+			       		def repogex = ".+/(.+)/.+"
+                  		def repo_name = (env.JOB_NAME =~ repogex)[0][1]
 						echo repo_name
 			       		
 			       		//Get variables from marketplace
 			       		def env_param = ""
 			       		if (target_branch!=null){
 				        	def lambda_url = 'https://8lmfqf29u1.execute-api.us-east-1.amazonaws.com/latest/deploy'
-					        placeholder = env.CHANGE_URL.replace('/pull/', '/issues/') + "/comments"
+					        def placeholder = env.CHANGE_URL.replace('/pull/', '/issues/') + "/comments"
 					        def git_sha = sh (
 					        	script: 'git rev-parse HEAD',
 					            	returnStdout: true
@@ -132,7 +132,7 @@ node('master'){
 
 //Run docker deploy script 
 def deploy(String env_param, String github_pull_req, String repo_name) {
-   placeholder = env.JOB_NAME.split('/')
+   //placeholder = env.JOB_NAME.split('/')
    //def repo_name = 'blueocean'
    def marketplace_url="http://marketplace-app-03.east1a.dev:3000/api/paas/docker/compose"
    def marketplace_prefix="app_env=${env_param}\\&repo_name=${placeholder[0]}/${repo_name}"
