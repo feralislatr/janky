@@ -64,7 +64,7 @@ node('master'){
 						          	stage 'Build a Docker Image for Component environment'
 							             	push(env_param, git_sha, repo_name)
 						            stage 'Deploy To Component Environment'
-							            	deploy(env_param, github_pull_req, repo_name)
+							            	deploy(env_param, github_pull_req)
 
 				        		//If pull request is to the master branch, deploy to minc, prodlike, or prod
 								} else if (target_branch == 'master'){ //case
