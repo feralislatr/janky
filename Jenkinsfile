@@ -29,7 +29,6 @@ node('master'){
 			       
 			       	stage 'Build the code'
 			       	stage 'Get Variables'
-			       		//Get env variables
 			       		def repo_name = env.JOB_NAME.split('/')
 			       		print repo_name
 			       		//Get variables from marketplace
@@ -65,11 +64,10 @@ node('master'){
 							        		sh "git branch -D temp2"
 							        	} catch (err) {}
 				                			sh "git checkout $target_branch"
-				                			//sh "git pull"
 				                			sh "cat README.md"
 											sh "git merge --no-ff temp2" //<<- origin branch
 											sh "cat README.md"
-											//sh "git push origin $target_branch"
+											sh "git push origin $target_branch"
 
 				        		//If pull request is to the master branch, deploy to minc, prodlike, or prod
 								} else if (target_branch == 'master'){ //case
@@ -156,12 +154,13 @@ def deploy(String env_param, String github_pull_req) {
 
 //Run docker tag and build scripts with respect to deploy environments
 def push(String env_param, String git_sha, String repo_name) {
+	
     //def repo_name = placeholder[1]
     //def repo_name = 'blueocean'
-    print repo_name
-    if (fileExists('pom.xml')){			//remove
-    	print 'Building the JAR file.' //remove
-    }
+   // print repo_name
+    // if (fileExists('pom.xml')){			//remove
+    // 	print 'Building the JAR file.' //remove
+    // }
     //If deploying to comp or minc, build new image
     if (env_param =='comp' || 'minc'){
     	echo" hi i'm comp or minc"
