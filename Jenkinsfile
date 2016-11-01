@@ -37,7 +37,7 @@ node('master'){
 			       		def env_param = ""
 			       		if (target_branch!=null){
 				        	def lambda_url = 'https://8lmfqf29u1.execute-api.us-east-1.amazonaws.com/latest/deploy'
-					        def placeholder = env.CHANGE_URL.replace('/pull/', '/issues/') + "/comments"
+					        placeholder = env.CHANGE_URL.replace('/pull/', '/issues/') + "/comments"
 					        def git_sha = sh (
 					        	script: 'git rev-parse HEAD',
 					            	returnStdout: true
