@@ -69,7 +69,7 @@ node('master'){
 				                			sh "cat README.md"
 											sh "git merge --no-ff temp2" //<<- origin branch
 											sh "cat README.md"
-											sh "git push origin $target_branch"
+											//sh "git push origin $target_branch"
 
 				        		//If pull request is to the master branch, deploy to minc, prodlike, or prod
 								} else if (target_branch == 'master'){ //case
