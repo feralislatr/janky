@@ -7,7 +7,8 @@ node('master'){
     	//Get credentials 
 	docker.withRegistry('http://dockerhub-app-01.east1e.nonprod.dmz/srvnonproddocker/', 'nonprod-dockerhub'){
 	    withCredentials([[$class : 'UsernamePasswordMultiBinding',
-	        credentialsId   : 'nonprod-github-cred',
+	        //========CHANGED FROM  'nonprod-github-cred' FOR TESTING========
+	        credentialsId   : 'steve-access-token',
 	        usernameVariable: 'USERNAME', 
 	        passwordVariable: 'PASSWORD'
 	        ]]) {
@@ -20,6 +21,8 @@ node('master'){
 			        	def target_branch = env.CHANGE_TARGET
 			        stage 'Test Mergeability'
 			        //Test to see if code can be merged automatically
+			        //try to see variables
+			        env | sort
 			        	try {
 			        		sh "git branch -D temp"
 			        	} catch (err) {}
@@ -55,15 +58,17 @@ node('master'){
 							             	push(env_param, git_sha)
 						            stage 'Deploy To Component Environment'
 							            	deploy(env_param, github_pull_req)
-								        // //merge
+								        //Merge
 								        sh "cat README.md"
 								        try {
 							        		sh "git branch -D temp2"
 							        	} catch (err) {}
 				                			sh "git checkout $target_branch"
 				                			sh "cat README.md"
-											//sh "git merge --no-ff temp2" //<<- origin branch
+											sh "git merge --no-ff temp2" //<<- origin branch
+											sh "cat README.md"
 											sh "git push origin $target_branch"
+
 				        		//If pull request is to the master branch, deploy to minc, prodlike, or prod
 								} else if (target_branch == 'master'){ //case
 									 env_param = 'minc'
