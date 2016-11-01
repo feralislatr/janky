@@ -25,7 +25,8 @@ node('master'){
 			        		sh "git branch -D temp"
 			        	} catch (err) {}
 			        	    sh "git checkout -b temp"
-        				    sh "git merge --no-ff origin/$target_branch"
+			        	    sh "git checkout $target_branch"
+        				    sh "git merge --no-ff temp"
 	
 			       	stage 'Get Variables'
 			       	sh "env | sort"
@@ -98,7 +99,6 @@ node('master'){
 			         		stage 'Test a Push'
 			           		print "Run some test"
 			         		stage 'Prepare the environment'
-			         			checkout scm
 			         		stage 'Build the code'
 			         		stage 'Run the Unit tests'
 			         		//unit tests run by Dockerfile
@@ -130,28 +130,9 @@ node('master'){
 	
 }
 
-//Run docker deploy script 
-def deploy(String env_param, String github_pull_req, String repo_name) {
-   //placeholder = env.JOB_NAME.split('/')
-   //def repo_name = 'blueocean'
-   def marketplace_url="http://marketplace-app-03.east1a.dev:3000/api/paas/docker/compose"
-   def marketplace_prefix="app_env=${env_param}\\&repo_name=${placeholder[0]}/${repo_name}"
-   print marketplace_prefix
-   sh ("/bin/bash /var/lib/jenkins/scripts/docker-compose-deploy-ucp-pipeline-reza.sh ${env_param} ${repo_name} ${marketplace_url} ${marketplace_prefix}")
-   
-   if(env_param == 'comp') {
-   	sh("curl -XPOST -H 'Content-Type: application/json' -d '{\"body\": \"Your service has been deployed to the **Component** Environment\"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
-   } else if(env_param == 'minc') {
-   	sh("curl -XPOST -H 'Content-Type: application/json' -d '{\"body\": \"Your service has been deployed to the **Minimum-Capacity** Environment\"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
-   } else if(env_param == 'prodlike') { 
-   	sh("curl -XPOST -H 'Content-Type: application/json' -d '{\"body\": \"Your service has been deployed to the **Production Like** Environment\"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
-   } else if(env_param == 'prod') {
-   	sh("curl -XPOST -H 'Content-Type: application/json' -d '{\"body\": \"Your service has been deployed to the **Production** Environment\"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
-   }
-}
-
 //Run docker tag and build scripts with respect to deploy environments
 def push(String env_param, String git_sha, String repo_name) {
+	placeholder = env.JOB_NAME.split('/')
     // if (fileExists('pom.xml')){			//remove
     // 	print 'Building the JAR file.' //remove
     // }
@@ -180,6 +161,29 @@ def push(String env_param, String git_sha, String repo_name) {
     	echo "wat"
 	}
 }
+
+
+//Run docker deploy script 
+def deploy(String env_param, String github_pull_req, String repo_name) {
+   //placeholder = env.JOB_NAME.split('/')
+   //def repo_name = 'blueocean'
+   def marketplace_url="http://marketplace-app-03.east1a.dev:3000/api/paas/docker/compose"
+   def marketplace_prefix="app_env=${env_param}\\&repo_name=${placeholder[0]}/${repo_name}"
+   print marketplace_prefix
+   sh ("/bin/bash /var/lib/jenkins/scripts/docker-compose-deploy-ucp-pipeline-reza.sh ${env_param} ${repo_name} ${marketplace_url} ${marketplace_prefix}")
+   
+   if(env_param == 'comp') {
+   	sh("curl -XPOST -H 'Content-Type: application/json' -d '{\"body\": \"Your service has been deployed to the **Component** Environment\"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
+   } else if(env_param == 'minc') {
+   	sh("curl -XPOST -H 'Content-Type: application/json' -d '{\"body\": \"Your service has been deployed to the **Minimum-Capacity** Environment\"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
+   } else if(env_param == 'prodlike') { 
+   	sh("curl -XPOST -H 'Content-Type: application/json' -d '{\"body\": \"Your service has been deployed to the **Production Like** Environment\"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
+   } else if(env_param == 'prod') {
+   	sh("curl -XPOST -H 'Content-Type: application/json' -d '{\"body\": \"Your service has been deployed to the **Production** Environment\"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
+   }
+}
+
+
 
 //Display input steps that ask the user to approve or abort a deployment to each environment
 def askApproval(String env_param, String lambda_url, String jenkins_pr_url, String github_pull_req) {
