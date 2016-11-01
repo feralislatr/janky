@@ -59,7 +59,7 @@ node('master'){
 						          	stage 'Build a Docker Image for Component environment'
 							             	push(env_param, git_sha, repo_name)
 						            stage 'Deploy To Component Environment'
-							            	deploy(env_param, github_pull_req)
+							            	deploy(env_param, github_pull_req, repo_name)
 								        //Merge
 								        sh "cat README.md"
 								        try {
@@ -79,7 +79,7 @@ node('master'){
 						             	stage 'Build a Docker Image for Minimum-Component environment'
 						               		push(env_param, git_sha, repo_name)
 						             	stage "Deploy to Minimum-Capacity"
-						               		deploy(env_param, github_pull_req)
+						               		deploy(env_param, github_pull_req, repo_name)
 						          
 						             	stage 'PROD-LIKE Approval'
 						             		env_param = 'prodlike'
@@ -87,7 +87,7 @@ node('master'){
 						             	stage 'Tag a Docker Image for Production-Like'
 						               		push(env_param, git_sha, repo_name)
 						             	stage 'Deploy to Production-Like'
-						                	deploy(env_param, github_pull_req)
+						                	deploy(env_param, github_pull_req, repo_name)
 
 						             	stage 'PROD Approval'
 						             		env_param = 'prod'
@@ -95,7 +95,7 @@ node('master'){
 						             	stage 'Tag a Docker Image for Production environment'
 						               		push(env_param, git_sha, repo_name)
 						               	stage "Deploy to Production"
-						                 	deploy(env_param, github_pull_req)
+						                 	deploy(env_param, github_pull_req, repo_name)
 						           	stage 'Ready to merge'
 							           	//Final merge of deployed code
 								        try {
@@ -134,7 +134,7 @@ node('master'){
 }
 
 //Run docker deploy script 
-def deploy(String env_param, String github_pull_req) {
+def deploy(String env_param, String github_pull_req, String repo_name) {
    //def repo_name = placeholder[1]
    //don't hardcode this
    //def repo_name = 'blueocean'
