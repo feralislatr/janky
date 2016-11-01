@@ -136,7 +136,7 @@ def push(String env_param, String git_sha) {
     	print 'Building the JAR file.'
     //	sh('mvn package')    
     }
-    sh ("/bin/bash /var/lib/jenkins/scripts/docker-build-pipeline.sh $repo_name $env_param $git_sha")
+    sh ("/bin/bash /var/lib/jenkins/scripts/docker-build-pipeline2.sh $repo_name $env_param $git_sha")
 }
 
 def askApproval(String env_app, String lambda_url, String jenkins_pr_url, String github_pull_req) {
