@@ -91,8 +91,9 @@ node('master'){
 								        try {
 							        		sh "git branch -D temp2"
 							        	} catch (err) {}
-				                			sh "git checkout -b temp2"
-				        				    sh "git merge origin/$target_branch"
+				        				    sh "git checkout $target_branch"
+											sh "git merge --no-ff test" //<<- origin branch
+											sh "git push origin $target_branch"
 
 						            		//This needs to become dynamic
 						            		sh("curl -XPOST -d '{\"state\": \"success\", \"context\": \"continuous-integration/jenkins/branch\"}' https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/api/v3/repos/reza-pipeline/test-sample-1/statuses/${git_sha}")
@@ -146,9 +147,9 @@ def push(String env_param, String git_sha) {
     //def repo_name = placeholder[1]
     def repo_name = 'blueocean'
     print repo_name
-    if (fileExists('pom.xml')){
-    	print 'Building the JAR file.'
-    //	run tests
+    if (fileExists('pom.xml')){			//remove
+    	print 'Building the JAR file.' //remove
+    
     }
 
 
