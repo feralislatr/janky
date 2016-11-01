@@ -57,7 +57,7 @@ node('master'){
 									stage 'Comp Approval'
 						             		askApproval(env_param, lambda_url, jenkins_pr_url, github_pull_req)
 						          	stage 'Build a Docker Image for Component environment'
-							             	push(env_param, git_sha)
+							             	push(env_param, git_sha, repo_name)
 						            stage 'Deploy To Component Environment'
 							            	deploy(env_param, github_pull_req)
 								        //Merge
@@ -77,7 +77,7 @@ node('master'){
 						     			stage 'MINC Approval'
 						                	askApproval(env_param, lambda_url, jenkins_pr_url, github_pull_req)
 						             	stage 'Build a Docker Image for Minimum-Component environment'
-						               		push(env_param, git_sha)
+						               		push(env_param, git_sha, repo_name)
 						             	stage "Deploy to Minimum-Capacity"
 						               		deploy(env_param, github_pull_req)
 						          
@@ -85,7 +85,7 @@ node('master'){
 						             		env_param = 'prodlike'
 						             		askApproval(env_param, lambda_url, jenkins_pr_url, github_pull_req)
 						             	stage 'Tag a Docker Image for Production-Like'
-						               		push(env_param, git_sha)
+						               		push(env_param, git_sha, repo_name)
 						             	stage 'Deploy to Production-Like'
 						                	deploy(env_param, github_pull_req)
 
@@ -93,7 +93,7 @@ node('master'){
 						             		env_param = 'prod'
 						             		askApproval(env_param, lambda_url, jenkins_pr_url, github_pull_req)
 						             	stage 'Tag a Docker Image for Production environment'
-						               		push(env_param, git_sha)
+						               		push(env_param, git_sha, repo_name)
 						               	stage "Deploy to Production"
 						                 	deploy(env_param, github_pull_req)
 						           	stage 'Ready to merge'
@@ -155,10 +155,8 @@ def deploy(String env_param, String github_pull_req) {
 }
 
 //Run docker tag and build scripts with respect to deploy environments
-def push(String env_param, String git_sha){
-	//, String repo_name) {
-	def repo_name = 'blueocean'
-   // print repo_name
+def push(String env_param, String git_sha, String repo_name) {
+
     // if (fileExists('pom.xml')){			//remove
     // 	print 'Building the JAR file.' //remove
     // }
