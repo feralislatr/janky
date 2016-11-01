@@ -188,9 +188,9 @@ def push(String env_param, String git_sha, repo_name) {
 // }
 
 //deploy function from master
-def deploy(String env_param, String github_pull_req, String repo_name) {
+def deploy(String env_param, String github_pull_req) {
    //def repo_name = placeholder[1]
-   //def repo_name = 'blueocean'
+   def repo_name = 'blueocean'
    def marketplace_url="http://marketplace-app-03.east1a.dev:3000/api/paas/docker/compose"
    def marketplace_prefix="app_env=${env_param}\\&repo_name=${placeholder[0]}/${repo_name}"
    print marketplace_prefix
