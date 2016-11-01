@@ -137,7 +137,7 @@ node('master'){
 def deploy(String env_param, String github_pull_req) {
    //def repo_name = placeholder[1]
    //don't hardcode this
-   def repo_name = 'blueocean'
+   //def repo_name = 'blueocean'
    def marketplace_url="http://marketplace-app-03.east1a.dev:3000/api/paas/docker/compose"
    def marketplace_prefix="app_env=${env_param}\\&repo_name=${placeholder[0]}/${repo_name}"
    print marketplace_prefix
@@ -156,7 +156,6 @@ def deploy(String env_param, String github_pull_req) {
 
 //Run docker tag and build scripts with respect to deploy environments
 def push(String env_param, String git_sha, String repo_name) {
-
     // if (fileExists('pom.xml')){			//remove
     // 	print 'Building the JAR file.' //remove
     // }
