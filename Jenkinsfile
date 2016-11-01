@@ -22,7 +22,8 @@ node('master'){
 			        stage 'Test Mergeability'
 			        //Test to see if code can be merged automatically
 			        //try to see variables
-			        env | sort
+			        echo "env variables"
+			        sh 'env | sort'
 			        	try {
 			        		sh "git branch -D temp"
 			        	} catch (err) {}
