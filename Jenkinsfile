@@ -29,8 +29,8 @@ node('master'){
 			       
 			       	stage 'Build the code'
 			       	stage 'Get Variables'
-			       		placeholder = ".+/(.+)/.+"
-                  		def repo_name = (env.JOB_NAME =~ placeholder)[0][1]
+			       		def reporegex = ".+/(.+)/.+"
+                  		def repo_name = (env.JOB_NAME =~ reporegex)[0][1]
 						echo repo_name
 			       		
 			       		//Get variables from marketplace
