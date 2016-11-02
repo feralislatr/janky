@@ -52,7 +52,6 @@ node('master') {
 					        try{
 					        	if (target_branch == 'development'){
 					        	env_app = 'comp'
-					        	env_param = "comp"
 								stage 'Comp Approval'
 						             		askApproval(env_app, lambda_url, jenkins_pr_url, github_pull_req)
 						        stage 'Build a Docker Image for Component environment'
@@ -61,7 +60,7 @@ node('master') {
 							            	 deploy(env_app, github_pull_req)
 							} else if (target_branch == 'master'){
 								 env_app = 'minc'
-								 
+
 						     		stage 'MINC Approval'
 						                	askApproval(env_app, lambda_url, jenkins_pr_url, github_pull_req)
 						             	stage 'Build a Docker Image for Minimum-Component environment'
@@ -175,7 +174,7 @@ def push(String env_param, String git_sha) {
 }
 
 def askApproval(String env_app, String lambda_url, String jenkins_pr_url, String github_pull_req) {
-	if(env_param == 'comp') {
+	if(env_app == 'comp') {
 		print 'Deploying to component'
 	     	sh("curl -XPOST -H 'Content-Type: application/json' -d '{\"body\": \"Hello, this is the CI/CD pipeline<br >If you want deploy to **Component** please click on *Continue*. <br >If you want to stop the Deployment click on *Abort* <br >[![abort](https://s3.amazonaws.com/gsa-iae-hosting-public-files/public-files/abort.jpg)](${lambda_url}?jenkins_url=${jenkins_pr_url}&action=abort&env=DeployComp&redirect=${env.CHANGE_URL})         [![continue](https://s3.amazonaws.com/gsa-iae-hosting-public-files/public-files/continue.png)](${lambda_url}?jenkins_url=${jenkins_pr_url}&action=proceedEmpty&env=DeployComp&redirect=${env.CHANGE_URL}) \"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
 			timeout(time:14, unit:'DAYS') {
