@@ -62,7 +62,7 @@ node('master'){
 									stage 'Comp Approval'
 						             		askApproval(env_param, lambda_url, jenkins_pr_url, github_pull_req)
 						          	stage 'Build a Docker Image for Component environment'
-							             	push(env_param, git_sha, repo_name)
+							             	push(env_param, git_sha)
 						            stage 'Deploy To Component Environment'
 						            echo "where is problem1"
 							            	deploy(env_param, github_pull_req)
@@ -73,25 +73,25 @@ node('master'){
 						     			stage 'MINC Approval'
 						                	askApproval(env_param, lambda_url, jenkins_pr_url, github_pull_req)
 						             	stage 'Build a Docker Image for Minimum-Component environment'
-						               		push(env_param, git_sha, repo_name)
+						               		push(env_param, git_sha)
 						             	stage "Deploy to Minimum-Capacity"
-						               		deploy(env_param, github_pull_req, repo_name)
+						               		deploy(env_param, github_pull_req)
 						          
 						             	stage 'PROD-LIKE Approval'
 						             		env_param = 'prodlike'
 						             		askApproval(env_param, lambda_url, jenkins_pr_url, github_pull_req)
 						             	stage 'Tag a Docker Image for Production-Like'
-						               		push(env_param, git_sha, repo_name)
+						               		push(env_param, git_sha)
 						             	stage 'Deploy to Production-Like'
-						                	deploy(env_param, github_pull_req, repo_name)
+						                	deploy(env_param, github_pull_req)
 
 						             	stage 'PROD Approval'
 						             		env_param = 'prod'
 						             		askApproval(env_param, lambda_url, jenkins_pr_url, github_pull_req)
 						             	stage 'Tag a Docker Image for Production environment'
-						               		push(env_param, git_sha, repo_name)
+						               		push(env_param, git_sha)
 						               	stage "Deploy to Production"
-						                 	deploy(env_param, github_pull_req, repo_name)
+						                 	deploy(env_param, github_pull_req)
 						           			
 					           	}
 							} catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException err) {
