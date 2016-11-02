@@ -108,8 +108,9 @@ node('master') {
 		      	
 			//sh('printenv')
 			stage 'Merge Pull Request'
+			echo "$repo_name"
 		      //sh "git remote set-url origin https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/Pipeline/blueocean-ui-service-reza.git"
-			sh "git remote set-url origin https://brianaslaterADM:144ce55e20843484ef8a84f774df5088ca72dd83@csp-github.micropaas.io/Pipeline/${repo_name}.git"
+			sh "git remote set-url origin https://brianaslaterADM:144ce55e20843484ef8a84f774df5088ca72dd83@csp-github.micropaas.io/Pipeline/nodejs-food-service.git"
 		    sh "git pull"
 			sh "git push origin $target_branch"
 
