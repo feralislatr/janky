@@ -25,7 +25,7 @@ node('master') {
 
 			        	def repogex = ".+/(.+)/.+"
                   		String repo_name = (env.JOB_NAME =~ repogex)[0][1]
-						echo repo_name
+						echo "$repo_name"
 			        stage 'Propose Merge'
 			        //Merge Code
 			        	try {
@@ -60,21 +60,20 @@ node('master') {
 								stage 'Comp Approval'
 						             		askApproval(env_app, lambda_url, jenkins_pr_url, github_pull_req)
 						        stage 'Build a Docker Image for Component environment'
-							             	 push(env_app, git_sha)
+							             	 push(env_app, git_sha, repo_name)
 						        stage "Deploy To Component Environment"
-							            	 deploy(env_app, github_pull_req)
+							            	 deploy(env_app, github_pull_req, repo_name)
 
-								//sh('printenv')
 								stage 'Merge Pull Request'
-								// echo "$repo_name"
-							 //      //sh "git remote set-url origin https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/Pipeline/blueocean-ui-service-reza.git"
-								// sh "git remote set-url origin https://brianaslaterADM:144ce55e20843484ef8a84f774df5088ca72dd83@csp-github.micropaas.io/Pipeline/nodejs-food-service.git"
-							 //    sh "git pull"
-								// sh "git push origin $target_branch"
+									echo "$repo_name"
+								      //sh "git remote set-url origin https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/Pipeline/blueocean-ui-service-reza.git"
+									sh "git remote set-url origin https://brianaslaterADM:144ce55e20843484ef8a84f774df5088ca72dd83@csp-github.micropaas.io/Pipeline/nodejs-food-service.git"
+								    sh "git pull"
+									sh "git push origin $target_branch"
 
-								// //This needs to become dynamic
-								// sh("curl -XPOST -d '{\"state\": \"success\", \"context\": \"continuous-integration/jenkins/branch\"}' https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/api/v3/repos/Pipeline/test-sample-1/statuses/${git_sha}")
-									merge(git_sha, repo_name, usernameVariable, passwordVariable)
+									//This needs to become dynamic
+									sh("curl -XPOST -d '{\"state\": \"success\", \"context\": \"continuous-integration/jenkins/branch\"}' https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/api/v3/repos/Pipeline/test-sample-1/statuses/${git_sha}")
+									
 
 							} else if (target_branch == 'master'){
 								 env_app = 'minc'
@@ -82,37 +81,36 @@ node('master') {
 						     		stage 'MINC Approval'
 						                	askApproval(env_app, lambda_url, jenkins_pr_url, github_pull_req)
 						             	stage 'Build a Docker Image for Minimum-Component environment'
-						               		push(env_app, git_sha)
+						               		push(env_app, git_sha, repo_name)
 						             	stage "Deploy to Minimum-Capacity"
-						               		deploy(env_app, github_pull_req)
+						               		deploy(env_app, github_pull_req, repo_name)
 						             	stage 'PROD-LIKE Approval'
 						             		env_app = 'prodlike'
 						             		askApproval(env_app, lambda_url, jenkins_pr_url, github_pull_req)
 						             	stage 'Tag a Docker Image for Production-Like'
-						               		push(env_app, git_sha)
+						               		push(env_app, git_sha, repo_name)
 						               
 						             	stage "Deploy to Production-Like"
-						                	deploy(env_app, github_pull_req)
+						                	deploy(env_app, github_pull_req, repo_name)
 						             	stage 'PROD Approval'
 						             		env_app = 'prod'
 						             		askApproval(env_app, lambda_url, jenkins_pr_url, github_pull_req)
 						             	stage 'Tag a Docker Image for Production environment'
-						               		push(env_app, git_sha)
+						               		push(env_app, git_sha, repo_name)
 						               
 						               	stage "Deploy to Production"
-						                 	deploy(env_app, github_pull_req)
-						           	//stage 'Ready to merge'
-												           	//sh('printenv')
-									stage 'Merge Pull Request'
-									// echo "$repo_name"
-								 //      //sh "git remote set-url origin https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/Pipeline/blueocean-ui-service-reza.git"
-									// sh "git remote set-url origin https://brianaslaterADM:144ce55e20843484ef8a84f774df5088ca72dd83@csp-github.micropaas.io/Pipeline/nodejs-food-service.git"
-								 //    sh "git pull"
-									// sh "git push origin $target_branch"
+						                 	deploy(env_app, github_pull_req, repo_name)
+						         
+										stage 'Merge Pull Request'
+											echo "$repo_name"
+										      //sh "git remote set-url origin https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/Pipeline/blueocean-ui-service-reza.git"
+											sh "git remote set-url origin https://brianaslaterADM:144ce55e20843484ef8a84f774df5088ca72dd83@csp-github.micropaas.io/Pipeline/nodejs-food-service.git"
+										    sh "git pull"
+											sh "git push origin $target_branch"
 
-									// //This needs to become dynamic
-									// sh("curl -XPOST -d '{\"state\": \"success\", \"context\": \"continuous-integration/jenkins/branch\"}' https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/api/v3/repos/Pipeline/test-sample-1/statuses/${git_sha}")
-						        		merge(git_sha, repo_name, usernameVariable, passwordVariable)     		
+											//This needs to become dynamic
+											sh("curl -XPOST -d '{\"state\": \"success\", \"context\": \"continuous-integration/jenkins/branch\"}' https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/api/v3/repos/Pipeline/test-sample-1/statuses/${git_sha}")
+							        	   		
 					           	}
 						} catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException err) {
 					        	print "Error I am in the "
@@ -141,9 +139,9 @@ node('master') {
 	
 }
 
-def deploy(String env_param, String github_pull_req) {
+def deploy(String env_param, String github_pull_req, String repo_name) {
    //def repo_name = placeholder[1]
-   def repo_name = 'blueocean'
+   //def repo_name = 'blueocean'
    def marketplace_url="http://marketplace-app-03.east1a.dev:3000/api/paas/docker/compose"
    def marketplace_prefix="app_env=${env_param}\\&repo_name=${placeholder[0]}/${repo_name}"
    print marketplace_prefix
@@ -160,22 +158,11 @@ def deploy(String env_param, String github_pull_req) {
    }
 }
 
-def merge(String git_sha, String repo_name, String usernameVariable, String passwordVariable){
-	echo "$repo_name"
-	//sh "git remote set-url origin https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/Pipeline/blueocean-ui-service-reza.git"
-	sh "git remote set-url origin https://brianaslaterADM:144ce55e20843484ef8a84f774df5088ca72dd83@csp-github.micropaas.io/Pipeline/${repo_name}.git"
-	sh "git pull"
-	sh "git push origin $target_branch"
-
-	//This needs to become dynamic
-	sh("curl -XPOST -d '{\"state\": \"success\", \"context\": \"continuous-integration/jenkins/branch\"}' https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/api/v3/repos/Pipeline/test-sample-1/statuses/${git_sha}")
-}
-
-def push(String env_param, String git_sha) {
+def push(String env_param, String git_sha, String repo_name) {
     placeholder = env.JOB_NAME.split('/')
     //def repo_name = placeholder[1]
-    def repo_name = 'blueocean'
-    print repo_name
+    //def repo_name = 'blueocean'
+    echo "pls $repo_name"
     // if (fileExists('pom.xml')){
     // 	print 'Building the JAR file.'
     // 	sh('mvn package')    
