@@ -156,10 +156,12 @@ def push(String env_app, String git_sha, String repo_name) {
     
     switch (env_app){
     	case "comp" :
+    		//build and push image
     		echo"env is: comp"
     		sh ("/bin/bash /var/lib/jenkins/scripts/docker-build-pipeline2.sh $repo_name $env_app $git_sha")
     		break
     	case "minc":
+    		//build and push image
     		echo"env is: minc"
     		sh ("/bin/bash /var/lib/jenkins/scripts/docker-build-pipeline2.sh $repo_name $env_app $git_sha")
     		break
@@ -167,19 +169,17 @@ def push(String env_app, String git_sha, String repo_name) {
     		echo "env is: prodlike"
 	    	//pull
 	    	sh("docker pull $docker_hub/srvnonproddocker/$repo_name:minc")
-	    	//tag image
+	    	//tag and push image
 	    	sh ("docker tag $docker_hub/srvnonproddocker/$repo_name:minc   $docker_hub/srvnonproddocker/$repo_name:$env_app")
 	    	sh ("docker push $docker_hub/srvnonproddocker/$repo_name:$env_app")
-	    	//sh ("/bin/bash /var/lib/jenkins/scripts/docker-tag-pipeline.sh $repo_name $env_app $git_sha")
     		break
     	case "prod" :
     		echo "env is: prod"
 	    	//pull
 	    	sh("docker pull $docker_hub/srvnonproddocker/$repo_name:prodlike")
-	    	//tag image
+	    	//tag and push image
 	    	sh ("docker tag $docker_hub/srvnonproddocker/$repo_name:prodlike   $docker_hub/srvnonproddocker/$repo_name:$env_app")
 	    	sh ("docker push $docker_hub/srvnonproddocker/$repo_name:$env_app")
-	    	//sh ("/bin/bash /var/lib/jenkins/scripts/docker-tag-pipeline.sh $repo_name $env_app $git_sha")
 	    	sh ("/bin/bash /var/lib/jenkins/scripts/docker-tag-pipeline.sh $repo_name $env_app $git_sha")
     		break	
     }
