@@ -3,17 +3,17 @@
 //calls docker-tag-pipeline and docker-build-pipeline2
 
 //ADD IN COMMENTS
-//USE REPO NAME IN PUSH AND DEPLOY : UPDATE METHOD CALLS & SIGNATURES
+
 //UPDATE DOCKERFILE TO RUN TESTS
-//CLOSE PULL REQUEST
+
 
 node('master') { 
 	//sh('printenv')
     	currentBuild.result = "SUCCESS" 
 	docker.withRegistry('http://dockerhub-app-01.east1e.nonprod.dmz/srvnonproddocker/', 'nonprod-dockerhub'){
 	    withCredentials([[$class : 'UsernamePasswordMultiBinding',
-	       // credentialsId   : 'nonprod-github-cred',
-	        credentialsId   : 'steve-access-token',
+	        credentialsId   : 'nonprod-github-cred',
+	        //credentialsId   : 'steve-access-token',
 	        usernameVariable: 'USERNAME', 
 	        passwordVariable: 'PASSWORD'
 	        ]]) {
@@ -66,8 +66,8 @@ node('master') {
 
 								stage 'Merge Pull Request'
 									echo "$repo_name"
-								    sh "git remote set-url origin https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/Pipeline/${repo_name}.git"
-									//sh "git remote set-url origin https://brianaslaterADM:144ce55e20843484ef8a84f774df5088ca72dd83@csp-github.micropaas.io/Pipeline/${repo_name}.git"
+								    //sh "git remote set-url origin https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/Pipeline/${repo_name}.git"
+									sh "git remote set-url origin https://brianaslaterADM:144ce55e20843484ef8a84f774df5088ca72dd83@csp-github.micropaas.io/Pipeline/${repo_name}.git"
 								    sh "git pull"
 									sh "git push origin $target_branch"
 
@@ -103,8 +103,8 @@ node('master') {
 						         
 										stage 'Merge Pull Request'
 											echo "$repo_name"
-										      //sh "git remote set-url origin https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/Pipeline/${repo_name}.git"
-											sh "git remote set-url origin https://brianaslaterADM:144ce55e20843484ef8a84f774df5088ca72dd83@csp-github.micropaas.io/Pipeline/${repo_name}.git"
+										    sh "git remote set-url origin https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/Pipeline/${repo_name}.git"
+											//sh "git remote set-url origin https://brianaslaterADM:144ce55e20843484ef8a84f774df5088ca72dd83@csp-github.micropaas.io/Pipeline/${repo_name}.git"
 										    sh "git pull"
 											sh "git push origin $target_branch"
 
