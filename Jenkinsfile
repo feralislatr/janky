@@ -153,32 +153,29 @@ def deploy(String env_app, String github_pull_req, String repo_name) {
 def push(String env_app, String git_sha, String repo_name) {
     placeholder = env.JOB_NAME.split('/')
     def docker_hub = "dockerhub-app-01.east1e.nonprod.dmz"
-    echo "the env pls: $env_app"
     
     switch (env_app){
     	case "comp" :
-    		echo" hi i'm comp"
+    		echo"env is: comp"
     		sh ("/bin/bash /var/lib/jenkins/scripts/docker-build-pipeline2.sh $repo_name $env_app $git_sha")
     		break
     	case "minc":
-    		echo" hi i'm minc"
+    		echo"env is: minc"
     		sh ("/bin/bash /var/lib/jenkins/scripts/docker-build-pipeline2.sh $repo_name $env_app $git_sha")
     		break
     	case "prodlike" :
-    		echo "hi i'm prodlike"
+    		echo "env is: prodlike"
 	    	//pull
 	    	sh("docker pull $docker_hub/srvnonproddocker/$repo_name:minc")
-	    	echo "hi i pulled"
 	    	//tag image
 	    	sh ("docker tag $docker_hub/srvnonproddocker/$repo_name:minc   $docker_hub/srvnonproddocker/$repo_name:$env_app")
 	    	sh ("docker push $docker_hub/srvnonproddocker/$repo_name:$env_app")
 	    	//sh ("/bin/bash /var/lib/jenkins/scripts/docker-tag-pipeline.sh $repo_name $env_app $git_sha")
     		break
     	case "prod" :
-    		echo "hi i'm prod"
+    		echo "env is: prod"
 	    	//pull
 	    	sh("docker pull $docker_hub/srvnonproddocker/$repo_name:prodlike")
-	    	echo "hi i pulled"
 	    	//tag image
 	    	sh ("docker tag $docker_hub/srvnonproddocker/$repo_name:prodlike   $docker_hub/srvnonproddocker/$repo_name:$env_app")
 	    	sh ("docker push $docker_hub/srvnonproddocker/$repo_name:$env_app")
