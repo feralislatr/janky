@@ -1,6 +1,6 @@
 #!groovy
 //nodeJS Jenkinsfile
-//calls docker-tag-pipeline and docker-build-pipeline2
+//calls docker-build-pipeline2
 node('master') { 
     currentBuild.result = "SUCCESS" 
     //Get credentials 
@@ -170,7 +170,9 @@ def push(String env_app, String git_sha, String repo_name) {
 	    	sh("docker pull $docker_hub/srvnonproddocker/$repo_name:minc")
 	    	echo "hi i pulled"
 	    	//tag image
-	    	sh ("/bin/bash /var/lib/jenkins/scripts/docker-tag-pipeline.sh $repo_name $env_app $git_sha")
+	    	sh ("docker tag $docker_hub/srvnonproddocker/$repo_name:minc   $docker_hub/srvnonproddocker/$repo_name:$env_app")
+	    	sh ("docker push $docker_hub/srvnonproddocker/$repo_name:$env_app")
+	    	//sh ("/bin/bash /var/lib/jenkins/scripts/docker-tag-pipeline.sh $repo_name $env_app $git_sha")
     		break
     	case "prod" :
     		echo "hi i'm prod"
@@ -178,34 +180,12 @@ def push(String env_app, String git_sha, String repo_name) {
 	    	sh("docker pull $docker_hub/srvnonproddocker/$repo_name:prodlike")
 	    	echo "hi i pulled"
 	    	//tag image
+	    	sh ("docker tag $docker_hub/srvnonproddocker/$repo_name:prodlike   $docker_hub/srvnonproddocker/$repo_name:$env_app")
+	    	sh ("docker push $docker_hub/srvnonproddocker/$repo_name:$env_app")
+	    	//sh ("/bin/bash /var/lib/jenkins/scripts/docker-tag-pipeline.sh $repo_name $env_app $git_sha")
 	    	sh ("/bin/bash /var/lib/jenkins/scripts/docker-tag-pipeline.sh $repo_name $env_app $git_sha")
     		break	
     }
-
-
- //     if (env_app =="comp" || "minc"){
- //    	echo" hi i'm comp or minc"
- //    	sh ("/bin/bash /var/lib/jenkins/scripts/docker-build-pipeline2.sh $repo_name $env_app $git_sha")
- //    //If deploying to prodlike or prod, pull image first and tag only
- //    }else if(env_app == "prodlike"){
- //    	echo "hi i'm prod"
- //    	//pull
- //    	sh("docker pull $DOCKER_HUB/srvnonproddocker/$repo_name:prodlike")
- //    	echo "hi i pulled"
- //    	//tag image
- //    	sh ("/bin/bash /var/lib/jenkins/scripts/docker-tag-pipeline.sh $repo_name $env_papp $git_sha")
-    
- //    }else if (env_app == "prod"){
- //    	echo "hi i'm prod"
- //    	//pull
- //    	sh("docker pull $DOCKER_HUB/srvnonproddocker/$repo_name:prodlike")
- //    	echo "hi i pulled"
- //    	//tag image
- //    	sh ("/bin/bash /var/lib/jenkins/scripts/docker-tag-pipeline.sh $repo_name $env_papp $git_sha")
-    
- //    }else{
- //    	echo "env_app: $env_app"
-	// }
 
 }
 
