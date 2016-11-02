@@ -170,7 +170,7 @@ def push(String env_app, String git_sha, String repo_name) {
 	    	sh("docker pull $docker_hub/srvnonproddocker/$repo_name:minc")
 	    	echo "hi i pulled"
 	    	//tag image
-	    	sh ("/bin/bash /var/lib/jenkins/scripts/docker-tag-pipeline.sh $repo_name $env_papp $git_sha")
+	    	sh ("/bin/bash /var/lib/jenkins/scripts/docker-tag-pipeline.sh $repo_name $env_app $git_sha")
     		break
     	case "prod" :
     		echo "hi i'm prod"
@@ -178,7 +178,7 @@ def push(String env_app, String git_sha, String repo_name) {
 	    	sh("docker pull $docker_hub/srvnonproddocker/$repo_name:prodlike")
 	    	echo "hi i pulled"
 	    	//tag image
-	    	sh ("/bin/bash /var/lib/jenkins/scripts/docker-tag-pipeline.sh $repo_name $env_papp $git_sha")
+	    	sh ("/bin/bash /var/lib/jenkins/scripts/docker-tag-pipeline.sh $repo_name $env_app $git_sha")
     		break	
     }
 
