@@ -52,7 +52,7 @@ node('master') {
 					        try{
 					        	//If pull request is to development, only deploy to comp envrionment
 					        	if (target_branch == 'development'){
-					        	env_app = 'comp'
+					        	env_app = "comp"
 								stage 'Comp Approval'
 						             		askApproval(env_app, lambda_url, jenkins_pr_url, github_pull_req)
 						        stage 'Build a Docker Image for Component environment'
@@ -72,7 +72,7 @@ node('master') {
 									
 							//If pull request is to the master branch, deploy to minc, prodlike, or prod
 							} else if (target_branch == 'master'){
-								 	env_app = 'minc'
+								 	env_app = "minc"
 						     		stage 'MINC Approval'
 						                	askApproval(env_app, lambda_url, jenkins_pr_url, github_pull_req)
 						             	stage 'Build a Docker Image for Minimum-Component environment'
@@ -81,7 +81,7 @@ node('master') {
 						               		deploy(env_app, github_pull_req, repo_name)
 						             	
 						             	stage 'PROD-LIKE Approval'
-						             		env_app = 'prodlike'
+						             		env_app = "prodlike"
 						             		askApproval(env_app, lambda_url, jenkins_pr_url, github_pull_req)
 						             	stage 'Tag a Docker Image for Production-Like'
 						               		push(env_app, git_sha, repo_name)
@@ -89,7 +89,7 @@ node('master') {
 						                	deploy(env_app, github_pull_req, repo_name)
 						             	
 						             	stage 'PROD Approval'
-						             		env_app = 'prod'
+						             		env_app = "prod"
 						             		askApproval(env_app, lambda_url, jenkins_pr_url, github_pull_req)
 						             	stage 'Tag a Docker Image for Production environment'
 						               		push(env_app, git_sha, repo_name)
@@ -153,36 +153,59 @@ def deploy(String env_app, String github_pull_req, String repo_name) {
 def push(String env_app, String git_sha, String repo_name) {
     placeholder = env.JOB_NAME.split('/')
     echo "the env pls: $env_app"
-    try {
-
-
-     if (env_app =='comp' || 'minc'){
-    	echo" hi i'm comp or minc"
-    	sh ("/bin/bash /var/lib/jenkins/scripts/docker-build-pipeline2.sh $repo_name $env_app $git_sha")
-    //If deploying to prodlike or prod, pull image first and tag only
-    }else if(env_app == 'prodlike'){
-    	echo "hi i'm prodlike"
-    	//pull
-    	sh("docker pull $DOCKER_HUB/srvnonproddocker/$repo_name:minc")
-    	echo "hi i pulled"
-    	//tag image
-    	sh ("/bin/bash /var/lib/jenkins/scripts/docker-tag-pipeline.sh $repo_name $env_app $git_sha")
     
-    }else if (env_app == 'prod'){
-    	echo "hi i'm prod"
-    	//pull
-    	sh("docker pull $DOCKER_HUB/srvnonproddocker/$repo_name:prodlike")
-    	echo "hi i pulled"
-    	//tag image
-    	sh ("/bin/bash /var/lib/jenkins/scripts/docker-tag-pipeline.sh $repo_name $env_papp $git_sha")
-    
-    }else{
-    	echo "env_app: $env_app"
-	}
+    switch (env_app){
+    	case /comp/ :
+    		echo" hi i'm comp"
+    		sh ("/bin/bash /var/lib/jenkins/scripts/docker-build-pipeline2.sh $repo_name $env_app $git_sha")
+    		break
+    	case /minc/:
+    		echo" hi i'm minc"
+    		sh ("/bin/bash /var/lib/jenkins/scripts/docker-build-pipeline2.sh $repo_name $env_app $git_sha")
+    		break
+    	case /prodlike/ :
+    		echo "hi i'm prodlike"
+	    	//pull
+	    	sh("docker pull $DOCKER_HUB/srvnonproddocker/$repo_name:minc")
+	    	echo "hi i pulled"
+	    	//tag image
+	    	sh ("/bin/bash /var/lib/jenkins/scripts/docker-tag-pipeline.sh $repo_name $env_papp $git_sha")
+    		break
+    	case /prod/ :
+    		echo "hi i'm prod"
+	    	//pull
+	    	sh("docker pull $DOCKER_HUB/srvnonproddocker/$repo_name:prodlike")
+	    	echo "hi i pulled"
+	    	//tag image
+	    	sh ("/bin/bash /var/lib/jenkins/scripts/docker-tag-pipeline.sh $repo_name $env_papp $git_sha")
+    		break	
+    }
 
-	}catch(err){
-		echo "not the right env..."
-	}
+
+ //     if (env_app =="comp" || "minc"){
+ //    	echo" hi i'm comp or minc"
+ //    	sh ("/bin/bash /var/lib/jenkins/scripts/docker-build-pipeline2.sh $repo_name $env_app $git_sha")
+ //    //If deploying to prodlike or prod, pull image first and tag only
+ //    }else if(env_app == "prodlike"){
+ //    	echo "hi i'm prod"
+ //    	//pull
+ //    	sh("docker pull $DOCKER_HUB/srvnonproddocker/$repo_name:prodlike")
+ //    	echo "hi i pulled"
+ //    	//tag image
+ //    	sh ("/bin/bash /var/lib/jenkins/scripts/docker-tag-pipeline.sh $repo_name $env_papp $git_sha")
+    
+ //    }else if (env_app == "prod"){
+ //    	echo "hi i'm prod"
+ //    	//pull
+ //    	sh("docker pull $DOCKER_HUB/srvnonproddocker/$repo_name:prodlike")
+ //    	echo "hi i pulled"
+ //    	//tag image
+ //    	sh ("/bin/bash /var/lib/jenkins/scripts/docker-tag-pipeline.sh $repo_name $env_papp $git_sha")
+    
+ //    }else{
+ //    	echo "env_app: $env_app"
+	// }
+
 }
 
 //Display input steps that ask the user to approve or abort a deployment to each environment
