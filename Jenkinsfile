@@ -149,30 +149,31 @@ def deploy(String env_param, String github_pull_req, String repo_name) {
 }
 
 //Run docker tag and build scripts with respect to deploy environments
-def push(String env_param, String git_sha, String repo_name) {
+//changed env_param to env_app
+def push(String env_app, String git_sha, String repo_name) {
     placeholder = env.JOB_NAME.split('/')
-     if (env_param =='comp' || 'minc'){
+     if (env_app =='comp' || 'minc'){
     	echo" hi i'm comp or minc"
-    	sh ("/bin/bash /var/lib/jenkins/scripts/docker-build-pipeline2.sh $repo_name $env_param $git_sha")
+    	sh ("/bin/bash /var/lib/jenkins/scripts/docker-build-pipeline2.sh $repo_name $env_app $git_sha")
     //If deploying to prodlike or prod, pull image first and tag only
-    }else if(env_param == 'prodlike'){
+    }else if(env_app == 'prodlike'){
     	echo "hi i'm prodlike"
     	//pull
     	sh("docker pull $DOCKER_HUB/srvnonproddocker/$repo_name:minc")
     	echo "hi i pulled"
     	//tag image
-    	sh ("/bin/bash /var/lib/jenkins/scripts/docker-tag-pipeline.sh $repo_name $env_param $git_sha")
+    	sh ("/bin/bash /var/lib/jenkins/scripts/docker-tag-pipeline.sh $repo_name $env_app $git_sha")
     
-    }else if (env_param == 'prod'){
+    }else if (env_app == 'prod'){
     	echo "hi i'm prod"
     	//pull
     	sh("docker pull $DOCKER_HUB/srvnonproddocker/$repo_name:prodlike")
     	echo "hi i pulled"
     	//tag image
-    	sh ("/bin/bash /var/lib/jenkins/scripts/docker-tag-pipeline.sh $repo_name $env_param $git_sha")
+    	sh ("/bin/bash /var/lib/jenkins/scripts/docker-tag-pipeline.sh $repo_name $env_papp $git_sha")
     
     }else{
-    	echo "env_param: $env_param"
+    	echo "env_app: $env_app"
 	}
 }
 
