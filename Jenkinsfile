@@ -131,19 +131,19 @@ node('master') {
 }
 
 //Run docker deploy script 
-def deploy(String env_param, String github_pull_req, String repo_name) {
+def deploy(String env_app, String github_pull_req, String repo_name) {
    def marketplace_url="http://marketplace-app-03.east1a.dev:3000/api/paas/docker/compose"
-   def marketplace_prefix="app_env=${env_param}\\&repo_name=${placeholder[0]}/${repo_name}"
+   def marketplace_prefix="app_env=${env_app}\\&repo_name=${placeholder[0]}/${repo_name}"
    print marketplace_prefix
-   sh ("/bin/bash /var/lib/jenkins/scripts/docker-compose-deploy-ucp-pipeline-reza.sh ${env_param} ${repo_name} ${marketplace_url} ${marketplace_prefix}")
+   sh ("/bin/bash /var/lib/jenkins/scripts/docker-compose-deploy-ucp-pipeline-reza.sh ${env_app} ${repo_name} ${marketplace_url} ${marketplace_prefix}")
    
-   if(env_param == 'comp') {
+   if(env_app == 'comp') {
    	sh("curl -XPOST -H 'Content-Type: application/json' -d '{\"body\": \"Your service has been deployed to the **Component** Environment\"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
-   } else if(env_param == 'minc') {
+   } else if(env_app == 'minc') {
    	sh("curl -XPOST -H 'Content-Type: application/json' -d '{\"body\": \"Your service has been deployed to the **Minimum-Capacity** Environment\"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
-   } else if(env_param == 'prodlike') {
+   } else if(env_app == 'prodlike') {
    	sh("curl -XPOST -H 'Content-Type: application/json' -d '{\"body\": \"Your service has been deployed to the **Production Like** Environment\"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
-   } else if(env_param == 'prod') {
+   } else if(env_app == 'prod') {
    	sh("curl -XPOST -H 'Content-Type: application/json' -d '{\"body\": \"Your service has been deployed to the **Production** Environment\"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
    }
 }
