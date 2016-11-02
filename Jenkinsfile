@@ -152,6 +152,7 @@ def deploy(String env_app, String github_pull_req, String repo_name) {
 //changed env_param to env_app
 def push(String env_app, String git_sha, String repo_name) {
     placeholder = env.JOB_NAME.split('/')
+    echo "the env pls: $env_app"
      if (env_app =='comp' || 'minc'){
     	echo" hi i'm comp or minc"
     	sh ("/bin/bash /var/lib/jenkins/scripts/docker-build-pipeline2.sh $repo_name $env_app $git_sha")
