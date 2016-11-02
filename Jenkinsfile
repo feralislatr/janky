@@ -148,12 +148,9 @@ def deploy(String env_param, String github_pull_req, String repo_name) {
    }
 }
 
+//Run docker tag and build scripts with respect to deploy environments
 def push(String env_param, String git_sha, String repo_name) {
     placeholder = env.JOB_NAME.split('/')
-    // if (fileExists('pom.xml')){
-    // 	print 'Building the JAR file.'
-    // 	sh('mvn package')    
-    // }
      if (env_param =='comp' || 'minc'){
     	echo" hi i'm comp or minc"
     	sh ("/bin/bash /var/lib/jenkins/scripts/docker-build-pipeline2.sh $repo_name $env_param $git_sha")
