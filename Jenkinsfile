@@ -1,23 +1,17 @@
 #!groovy
 //nodeJS Jenkinsfile
 //calls docker-tag-pipeline and docker-build-pipeline2
-
-//ADD IN COMMENTS
-
-//UPDATE DOCKERFILE TO RUN TESTS
-
-
 node('master') { 
-	//sh('printenv')
-    	currentBuild.result = "SUCCESS" 
+    currentBuild.result = "SUCCESS" 
+    //Get credentials 
 	docker.withRegistry('http://dockerhub-app-01.east1e.nonprod.dmz/srvnonproddocker/', 'nonprod-dockerhub'){
 	    withCredentials([[$class : 'UsernamePasswordMultiBinding',
 	        credentialsId   : 'nonprod-github-cred',
-	        //credentialsId   : 'steve-access-token',
 	        usernameVariable: 'USERNAME', 
 	        passwordVariable: 'PASSWORD'
 	        ]]) {
 		    	try {
+		    		//Get current commit from github
 		    		checkout scm
 			       	stage 'Prepare the environment'
 			       	stage 'Detemining a Target Branch'
@@ -54,7 +48,9 @@ node('master') {
 					        placeholder = env.BUILD_URL.replace('http', 'https')
 					        def jenkins_pr_url = placeholder.replace(':8080', '')
 					        print jenkins_pr_url
+					        //Main pipeline
 					        try{
+					        	//If pull request is to development, only deploy to comp envrionment
 					        	if (target_branch == 'development'){
 					        	env_app = 'comp'
 								stage 'Comp Approval'
@@ -64,9 +60,9 @@ node('master') {
 						        stage "Deploy To Component Environment"
 							            	 deploy(env_app, github_pull_req, repo_name)
 
+							    //Push merged code after deployment
 								stage 'Merge Pull Request'
 									echo "$repo_name"
-								    //sh "git remote set-url origin https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/Pipeline/${repo_name}.git"
 									sh "git remote set-url origin https://brianaslaterADM:144ce55e20843484ef8a84f774df5088ca72dd83@csp-github.micropaas.io/Pipeline/${repo_name}.git"
 								    sh "git pull"
 									sh "git push origin $target_branch"
@@ -74,37 +70,36 @@ node('master') {
 									//This needs to become dynamic
 									sh("curl -XPOST -d '{\"state\": \"success\", \"context\": \"continuous-integration/jenkins/branch\"}' https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/api/v3/repos/Pipeline/test-sample-1/statuses/${git_sha}")
 									
-
+							//If pull request is to the master branch, deploy to minc, prodlike, or prod
 							} else if (target_branch == 'master'){
-								 env_app = 'minc'
-
+								 	env_app = 'minc'
 						     		stage 'MINC Approval'
 						                	askApproval(env_app, lambda_url, jenkins_pr_url, github_pull_req)
 						             	stage 'Build a Docker Image for Minimum-Component environment'
 						               		push(env_app, git_sha, repo_name)
 						             	stage "Deploy to Minimum-Capacity"
 						               		deploy(env_app, github_pull_req, repo_name)
+						             	
 						             	stage 'PROD-LIKE Approval'
 						             		env_app = 'prodlike'
 						             		askApproval(env_app, lambda_url, jenkins_pr_url, github_pull_req)
 						             	stage 'Tag a Docker Image for Production-Like'
 						               		push(env_app, git_sha, repo_name)
-						               
-						             	stage "Deploy to Production-Like"
+						                stage "Deploy to Production-Like"
 						                	deploy(env_app, github_pull_req, repo_name)
+						             	
 						             	stage 'PROD Approval'
 						             		env_app = 'prod'
 						             		askApproval(env_app, lambda_url, jenkins_pr_url, github_pull_req)
 						             	stage 'Tag a Docker Image for Production environment'
 						               		push(env_app, git_sha, repo_name)
-						               
 						               	stage "Deploy to Production"
 						                 	deploy(env_app, github_pull_req, repo_name)
-						         
+
+						         		//Push merged code after deployment
 										stage 'Merge Pull Request'
 											echo "$repo_name"
 										    sh "git remote set-url origin https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/Pipeline/${repo_name}.git"
-											//sh "git remote set-url origin https://brianaslaterADM:144ce55e20843484ef8a84f774df5088ca72dd83@csp-github.micropaas.io/Pipeline/${repo_name}.git"
 										    sh "git pull"
 											sh "git push origin $target_branch"
 
@@ -117,15 +112,12 @@ node('master') {
 					           	sh("curl -XPOST -H 'Content-Type: application/json' -d '{\"body\": \"CI/CD could not finish the deployment process because the Deployment has been **Aborted**.\"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
 					            	throw err
 					       	}
-			         	} else { //feature branch
-			         		//fix these stages
+			         	} else { //Run tests on push to a feature branch
 			         		stage 'Test a Push'
-			           		print "Run some test"
-			         		stage 'Prepare the environment'
-			         		//	checkout scm
+			           		print "Run tests"
 			         		stage 'Build the code'
 			         		stage 'Run the Unit tests'
-			         			//sh ('mvn install')
+			         		//unit tests run by Dockerfile
 			         	}
 		      	} catch (err) {
 		        	print "An error happened:"
@@ -133,15 +125,13 @@ node('master') {
 		        	sh("curl -XPOST -H 'Content-Type: application/json' -d '{\"body\": \"CI/CD could not finish the deployment process because the Folowing error: <br > ${err} \"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
 		      	}
 		      	
-
 			}
     	}
 	
 }
 
+//Run docker deploy script 
 def deploy(String env_param, String github_pull_req, String repo_name) {
-   //def repo_name = placeholder[1]
-   //def repo_name = 'blueocean'
    def marketplace_url="http://marketplace-app-03.east1a.dev:3000/api/paas/docker/compose"
    def marketplace_prefix="app_env=${env_param}\\&repo_name=${placeholder[0]}/${repo_name}"
    print marketplace_prefix
@@ -160,9 +150,6 @@ def deploy(String env_param, String github_pull_req, String repo_name) {
 
 def push(String env_param, String git_sha, String repo_name) {
     placeholder = env.JOB_NAME.split('/')
-    //def repo_name = placeholder[1]
-    //def repo_name = 'blueocean'
-    echo "pls $repo_name"
     // if (fileExists('pom.xml')){
     // 	print 'Building the JAR file.'
     // 	sh('mvn package')    
@@ -188,12 +175,13 @@ def push(String env_param, String git_sha, String repo_name) {
     	sh ("/bin/bash /var/lib/jenkins/scripts/docker-tag-pipeline.sh $repo_name $env_param $git_sha")
     
     }else{
-    	echo "wat"
+    	echo "env_param: $env_param"
 	}
 }
 
+//Display input steps that ask the user to approve or abort a deployment to each environment
 def askApproval(String env_app, String lambda_url, String jenkins_pr_url, String github_pull_req) {
-	//Minc input steps
+	//Comp input steps
 	if(env_app == 'comp') {
 		print 'Deploying to component'
 	     	sh("curl -XPOST -H 'Content-Type: application/json' -d '{\"body\": \"Hello, this is the CI/CD pipeline<br >If you want deploy to **Component** please click on *Continue*. <br >If you want to stop the Deployment click on *Abort* <br >[![abort](https://s3.amazonaws.com/gsa-iae-hosting-public-files/public-files/abort.jpg)](${lambda_url}?jenkins_url=${jenkins_pr_url}&action=abort&env=DeployComp&redirect=${env.CHANGE_URL})         [![continue](https://s3.amazonaws.com/gsa-iae-hosting-public-files/public-files/continue.png)](${lambda_url}?jenkins_url=${jenkins_pr_url}&action=proceedEmpty&env=DeployComp&redirect=${env.CHANGE_URL}) \"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
