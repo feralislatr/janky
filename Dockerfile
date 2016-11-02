@@ -8,7 +8,7 @@ WORKDIR /usr/src/app
 COPY package.json /usr/src/app/
 COPY food.js /usr/src/app/
 COPY migrations /usr/src/app/migrations
-#RUN npm install
+RUN npm install
 
 EXPOSE 8080
 CMD [ "npm", "start" ]
