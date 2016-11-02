@@ -51,7 +51,8 @@ node('master') {
 					        print jenkins_pr_url
 					        try{
 					        	if (target_branch == 'development'){
-					        		 env_app = 'comp'
+					        	env_app = 'comp'
+					        	env_param = "comp"
 								stage 'Comp Approval'
 						             		askApproval(env_app, lambda_url, jenkins_pr_url, github_pull_req)
 						        stage 'Build a Docker Image for Component environment'
@@ -60,6 +61,7 @@ node('master') {
 							            	 deploy(env_app, github_pull_req)
 							} else if (target_branch == 'master'){
 								 env_app = 'minc'
+								 
 						     		stage 'MINC Approval'
 						                	askApproval(env_app, lambda_url, jenkins_pr_url, github_pull_req)
 						             	stage 'Build a Docker Image for Minimum-Component environment'
