@@ -152,6 +152,7 @@ def deploy(String env_app, String github_pull_req, String repo_name) {
 //changed env_param to env_app
 def push(String env_app, String git_sha, String repo_name) {
     placeholder = env.JOB_NAME.split('/')
+    def docker_hub = "dockerhub-app-01.east1e.nonprod.dmz"
     echo "the env pls: $env_app"
     
     switch (env_app){
@@ -166,7 +167,7 @@ def push(String env_app, String git_sha, String repo_name) {
     	case "prodlike" :
     		echo "hi i'm prodlike"
 	    	//pull
-	    	sh("docker pull $DOCKER_HUB/srvnonproddocker/$repo_name:minc")
+	    	sh("docker pull $docker_hub/srvnonproddocker/$repo_name:minc")
 	    	echo "hi i pulled"
 	    	//tag image
 	    	sh ("/bin/bash /var/lib/jenkins/scripts/docker-tag-pipeline.sh $repo_name $env_papp $git_sha")
@@ -174,7 +175,7 @@ def push(String env_app, String git_sha, String repo_name) {
     	case "prod" :
     		echo "hi i'm prod"
 	    	//pull
-	    	sh("docker pull $DOCKER_HUB/srvnonproddocker/$repo_name:prodlike")
+	    	sh("docker pull $docker_hub/srvnonproddocker/$repo_name:prodlike")
 	    	echo "hi i pulled"
 	    	//tag image
 	    	sh ("/bin/bash /var/lib/jenkins/scripts/docker-tag-pipeline.sh $repo_name $env_papp $git_sha")
