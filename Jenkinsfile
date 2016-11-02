@@ -23,7 +23,7 @@ node('master'){
 			        	def repogex = ".+/(.+)/.+"
                   		String repo_name = (env.JOB_NAME =~ repogex)[0][1]
 						echo repo_name
-			        stage 'Merge'
+			        stage 'Propose Merge'
 			        //Merge Code
 			        	try {
 			        		sh "git branch -D temp"
@@ -136,7 +136,7 @@ node('master'){
 }
 
 //Run docker tag and build scripts with respect to deploy environments
-def push(String env_param, String git_sha, repo_name) {
+def push(String env_param, String git_sha, String repo_name) {
 	placeholder = env.JOB_NAME.split('/')
     // if (fileExists('pom.xml')){			//remove
     // 	print 'Building the JAR file.' //remove
