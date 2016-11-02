@@ -187,7 +187,7 @@ def askApproval(String env_app, String lambda_url, String jenkins_pr_url, String
 					id: 'DeployComp', message: 'Deploy to Comp?')
      		}
      //Minc input steps
-	} else if(env_param == 'minc') {
+	} else if(env_app == 'minc') {
 		print 'Deploying to minimum-capacity'
      	  	sh("curl -XPOST -H 'Content-Type: application/json' -d '{\"body\": \"Hello, this is the CI/CD pipeline<br >If you want deploy to **MINIMUM-CAPACITY** please click on *Continue*. <br >If you want to stop the Deployment click on *Abort* <br >[![abort](https://s3.amazonaws.com/gsa-iae-hosting-public-files/public-files/abort.jpg)](${lambda_url}?jenkins_url=${jenkins_pr_url}&action=abort&env=DeployMinc&redirect=${env.CHANGE_URL})         [![continue](https://s3.amazonaws.com/gsa-iae-hosting-public-files/public-files/continue.png)](${lambda_url}?jenkins_url=${jenkins_pr_url}&action=proceedEmpty&env=DeployMinc&redirect=${env.CHANGE_URL}) \"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
      		timeout(time:14, unit:'DAYS') {
@@ -195,7 +195,7 @@ def askApproval(String env_app, String lambda_url, String jenkins_pr_url, String
 					id: 'DeployMinc', message: 'Deploy to Minc?')
      		}
      //Prodlike input steps
-	} else if(env_param == 'prodlike') {
+	} else if(env_app == 'prodlike') {
 		print 'Deploying to prod-like'
 			sh("curl -XPOST -H 'Content-Type: application/json' -d '{\"body\": \"Hello, this is the CI/CD pipeline<br >If you want deploy to **PRODUCTION-LIKE** please click on *Continue*. <br >If you want to stop the Deployment click on *Abort* <br >[![abort](https://s3.amazonaws.com/gsa-iae-hosting-public-files/public-files/abort.jpg)](${lambda_url}?jenkins_url=${jenkins_pr_url}&action=abort&env=DeployProdLike&redirect=${env.CHANGE_URL})         [![continue](https://s3.amazonaws.com/gsa-iae-hosting-public-files/public-files/continue.png)](${lambda_url}?jenkins_url=${jenkins_pr_url}&action=proceedEmpty&env=DeployProdLike&redirect=${env.CHANGE_URL}) \"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
 			timeout(time:14, unit:'DAYS') {
@@ -203,7 +203,7 @@ def askApproval(String env_app, String lambda_url, String jenkins_pr_url, String
 					id: 'DeployProdLike', message: 'Deploy to Prod-Like?')
      		}
      //Prod input steps
-	} else if(env_param == 'prod') {
+	} else if(env_app == 'prod') {
 		print 'Deploying to prod'
      		sh("curl -XPOST -H 'Content-Type: application/json' -d '{\"body\": \"Hello, this is the CI/CD pipeline<br >If you want deploy to **PRODUCTION** please click on *Continue*. <br >If you want to stop the Deployment click on *Abort* <br >[![abort](https://s3.amazonaws.com/gsa-iae-hosting-public-files/public-files/abort.jpg)](${lambda_url}?jenkins_url=${jenkins_pr_url}&action=abort&env=DeployProd&redirect=${env.CHANGE_URL})         [![continue](https://s3.amazonaws.com/gsa-iae-hosting-public-files/public-files/continue.png)](${lambda_url}?jenkins_url=${jenkins_pr_url}&action=proceedEmpty&env=DeployProd&redirect=${env.CHANGE_URL}) \"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
 			timeout(time:14, unit:'DAYS') {
