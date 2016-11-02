@@ -136,11 +136,12 @@ node('master'){
 }
 
 //Run docker tag and build scripts with respect to deploy environments
-def push(String env_param, String git_sha, String repo_name) {
+def push(String env_param, String git_sha) {
 	placeholder = env.JOB_NAME.split('/')
     // if (fileExists('pom.xml')){			//remove
     // 	print 'Building the JAR file.' //remove
     // }
+    def repo_name = 'blueocean'
     //If deploying to comp or minc, build new image
     if (env_param =='comp' || 'minc'){
     	echo" hi i'm comp or minc"
