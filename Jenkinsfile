@@ -8,7 +8,8 @@ node('master'){
 	docker.withRegistry('http://dockerhub-app-01.east1e.nonprod.dmz/srvnonproddocker/', 'nonprod-dockerhub'){
 	    withCredentials([[$class : 'UsernamePasswordMultiBinding',
 	        //========CHANGED FROM  'nonprod-github-cred' FOR TESTING========
-	        credentialsId   : 'steve-access-token',
+	       // credentialsId   : 'steve-access-token',
+	        credentialsId   : 'nonprod-github-cred',
 	        usernameVariable: 'USERNAME', 
 	        passwordVariable: 'PASSWORD'
 	        ]]) {
