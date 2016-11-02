@@ -2,6 +2,11 @@
 //nodeJS Jenkinsfile
 //calls docker-tag-pipeline and docker-build-pipeline2
 
+//ADD IN COMMENTS
+//USE REPO NAME IN PUSH AND DEPLOY : UPDATE METHOD CALLS & SIGNATURES
+//MAKE FUNCTION FOR MERGE
+//UPDATE DOCKERFILE TO RUN TESTS
+
 node('master') { 
 	//sh('printenv')
     	currentBuild.result = "SUCCESS" 
@@ -61,15 +66,16 @@ node('master') {
 
 								//sh('printenv')
 								stage 'Merge Pull Request'
-								echo "$repo_name"
-							      //sh "git remote set-url origin https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/Pipeline/blueocean-ui-service-reza.git"
-								sh "git remote set-url origin https://brianaslaterADM:144ce55e20843484ef8a84f774df5088ca72dd83@csp-github.micropaas.io/Pipeline/nodejs-food-service.git"
-							    sh "git pull"
-								sh "git push origin $target_branch"
+								// echo "$repo_name"
+							 //      //sh "git remote set-url origin https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/Pipeline/blueocean-ui-service-reza.git"
+								// sh "git remote set-url origin https://brianaslaterADM:144ce55e20843484ef8a84f774df5088ca72dd83@csp-github.micropaas.io/Pipeline/nodejs-food-service.git"
+							 //    sh "git pull"
+								// sh "git push origin $target_branch"
 
-								//This needs to become dynamic
-								sh("curl -XPOST -d '{\"state\": \"success\", \"context\": \"continuous-integration/jenkins/branch\"}' https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/api/v3/repos/Pipeline/test-sample-1/statuses/${git_sha}")
-							
+								// //This needs to become dynamic
+								// sh("curl -XPOST -d '{\"state\": \"success\", \"context\": \"continuous-integration/jenkins/branch\"}' https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/api/v3/repos/Pipeline/test-sample-1/statuses/${git_sha}")
+									merge(git_sha, repo_name, usernameVariable, passwordVariable)
+
 							} else if (target_branch == 'master'){
 								 env_app = 'minc'
 
@@ -98,29 +104,30 @@ node('master') {
 						           	//stage 'Ready to merge'
 												           	//sh('printenv')
 									stage 'Merge Pull Request'
-									echo "$repo_name"
-								      //sh "git remote set-url origin https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/Pipeline/blueocean-ui-service-reza.git"
-									sh "git remote set-url origin https://brianaslaterADM:144ce55e20843484ef8a84f774df5088ca72dd83@csp-github.micropaas.io/Pipeline/nodejs-food-service.git"
-								    sh "git pull"
-									sh "git push origin $target_branch"
+									// echo "$repo_name"
+								 //      //sh "git remote set-url origin https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/Pipeline/blueocean-ui-service-reza.git"
+									// sh "git remote set-url origin https://brianaslaterADM:144ce55e20843484ef8a84f774df5088ca72dd83@csp-github.micropaas.io/Pipeline/nodejs-food-service.git"
+								 //    sh "git pull"
+									// sh "git push origin $target_branch"
 
-									//This needs to become dynamic
-									sh("curl -XPOST -d '{\"state\": \"success\", \"context\": \"continuous-integration/jenkins/branch\"}' https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/api/v3/repos/Pipeline/test-sample-1/statuses/${git_sha}")
-						            		
+									// //This needs to become dynamic
+									// sh("curl -XPOST -d '{\"state\": \"success\", \"context\": \"continuous-integration/jenkins/branch\"}' https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/api/v3/repos/Pipeline/test-sample-1/statuses/${git_sha}")
+						        		merge(git_sha, repo_name, usernameVariable, passwordVariable)     		
 					           	}
 						} catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException err) {
 					        	print "Error I am in the "
 					           	sh("curl -XPOST -H 'Content-Type: application/json' -d '{\"body\": \"CI/CD could not finish the deployment process because the Deployment has been **Aborted**.\"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
 					            	throw err
 					       	}
-			         	} else {
+			         	} else { //feature branch
+			         		//fix these stages
 			         		stage 'Test a Push'
 			           		print "Run some test"
 			         		stage 'Prepare the environment'
-			         			checkout scm
+			         		//	checkout scm
 			         		stage 'Build the code'
 			         		stage 'Run the Unit tests'
-			         			sh ('mvn install')
+			         			//sh ('mvn install')
 			         	}
 		      	} catch (err) {
 		        	print "An error happened:"
@@ -151,6 +158,17 @@ def deploy(String env_param, String github_pull_req) {
    } else if(env_param == 'prod') {
    	sh("curl -XPOST -H 'Content-Type: application/json' -d '{\"body\": \"Your service has been deployed to the **Production** Environment\"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
    }
+}
+
+def merge(String git_sha, String repo_name, String usernameVariable, String passwordVariable){
+	echo "$repo_name"
+	//sh "git remote set-url origin https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/Pipeline/blueocean-ui-service-reza.git"
+	sh "git remote set-url origin https://brianaslaterADM:144ce55e20843484ef8a84f774df5088ca72dd83@csp-github.micropaas.io/Pipeline/${repo_name}.git"
+	sh "git pull"
+	sh "git push origin $target_branch"
+
+	//This needs to become dynamic
+	sh("curl -XPOST -d '{\"state\": \"success\", \"context\": \"continuous-integration/jenkins/branch\"}' https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/api/v3/repos/Pipeline/test-sample-1/statuses/${git_sha}")
 }
 
 def push(String env_param, String git_sha) {
@@ -188,6 +206,7 @@ def push(String env_param, String git_sha) {
 }
 
 def askApproval(String env_app, String lambda_url, String jenkins_pr_url, String github_pull_req) {
+	//Minc input steps
 	if(env_app == 'comp') {
 		print 'Deploying to component'
 	     	sh("curl -XPOST -H 'Content-Type: application/json' -d '{\"body\": \"Hello, this is the CI/CD pipeline<br >If you want deploy to **Component** please click on *Continue*. <br >If you want to stop the Deployment click on *Abort* <br >[![abort](https://s3.amazonaws.com/gsa-iae-hosting-public-files/public-files/abort.jpg)](${lambda_url}?jenkins_url=${jenkins_pr_url}&action=abort&env=DeployComp&redirect=${env.CHANGE_URL})         [![continue](https://s3.amazonaws.com/gsa-iae-hosting-public-files/public-files/continue.png)](${lambda_url}?jenkins_url=${jenkins_pr_url}&action=proceedEmpty&env=DeployComp&redirect=${env.CHANGE_URL}) \"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
