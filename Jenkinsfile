@@ -58,6 +58,18 @@ node('master') {
 							             	 push(env_app, git_sha)
 						        stage "Deploy To Component Environment"
 							            	 deploy(env_app, github_pull_req)
+
+								//sh('printenv')
+								stage 'Merge Pull Request'
+								echo "$repo_name"
+							      //sh "git remote set-url origin https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/Pipeline/blueocean-ui-service-reza.git"
+								sh "git remote set-url origin https://brianaslaterADM:144ce55e20843484ef8a84f774df5088ca72dd83@csp-github.micropaas.io/Pipeline/nodejs-food-service.git"
+							    sh "git pull"
+								sh "git push origin $target_branch"
+
+								//This needs to become dynamic
+								sh("curl -XPOST -d '{\"state\": \"success\", \"context\": \"continuous-integration/jenkins/branch\"}' https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/api/v3/repos/Pipeline/test-sample-1/statuses/${git_sha}")
+							
 							} else if (target_branch == 'master'){
 								 env_app = 'minc'
 
@@ -83,7 +95,17 @@ node('master') {
 						               
 						               	stage "Deploy to Production"
 						                 	deploy(env_app, github_pull_req)
-						           	stage 'Ready to merge'
+						           	//stage 'Ready to merge'
+												           	//sh('printenv')
+									stage 'Merge Pull Request'
+									echo "$repo_name"
+								      //sh "git remote set-url origin https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/Pipeline/blueocean-ui-service-reza.git"
+									sh "git remote set-url origin https://brianaslaterADM:144ce55e20843484ef8a84f774df5088ca72dd83@csp-github.micropaas.io/Pipeline/nodejs-food-service.git"
+								    sh "git pull"
+									sh "git push origin $target_branch"
+
+									//This needs to become dynamic
+									sh("curl -XPOST -d '{\"state\": \"success\", \"context\": \"continuous-integration/jenkins/branch\"}' https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/api/v3/repos/Pipeline/test-sample-1/statuses/${git_sha}")
 						            		
 					           	}
 						} catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException err) {
@@ -106,16 +128,7 @@ node('master') {
 		        	sh("curl -XPOST -H 'Content-Type: application/json' -d '{\"body\": \"CI/CD could not finish the deployment process because the Folowing error: <br > ${err} \"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
 		      	}
 		      	
-			//sh('printenv')
-			stage 'Merge Pull Request'
-			echo "$repo_name"
-		      //sh "git remote set-url origin https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/Pipeline/blueocean-ui-service-reza.git"
-			sh "git remote set-url origin https://brianaslaterADM:144ce55e20843484ef8a84f774df5088ca72dd83@csp-github.micropaas.io/Pipeline/nodejs-food-service.git"
-		    sh "git pull"
-			sh "git push origin $target_branch"
 
-			//This needs to become dynamic
-			sh("curl -XPOST -d '{\"state\": \"success\", \"context\": \"continuous-integration/jenkins/branch\"}' https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/api/v3/repos/Pipeline/test-sample-1/statuses/${git_sha}")
 			}
     	}
 	
