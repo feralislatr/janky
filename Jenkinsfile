@@ -152,7 +152,7 @@ def deploy(String env_app, String github_pull_req, String repo_name) {
 def push(String env_app, String git_sha, String repo_name) {
     placeholder = env.JOB_NAME.split('/')
     def dockerhub = "dockerhub-app-01.east1e.nonprod.dmz"
-    def short_commit=$git_sha.take(6)
+    def short_commit="$git_sha".take(6)
 
     switch (env_app){
     	case "comp" :
