@@ -199,10 +199,11 @@ def push(String env_app, String git_sha, String repo_name) {
     	case "prod" :
     		echo "env is: prod"
 	    	//use previously pushed image
+	    	docker.pull("prodlike-$short_commit")
 	    	masterImg = docker.image("srvnonproddocker/$repo_name:prodlike-$short_commit")
 	    	print masterImg.id
 	    	//tag with prod
-	    	masterImg.tag "$env_app-$short_commit"
+	    	//masterImg.tag "$env_app-$short_commit"
 			//masterImg.inside{sh 'npm install'}
 			//push re-tagged image to dockerhub
 			masterImg.push "$env_app-$short_commit"
