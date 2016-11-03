@@ -194,7 +194,7 @@ def push(String env_app, String git_sha, String repo_name) {
 			//push re-tagged image to dockerhub
 			masterImg.push "prodlike-$short_commit"
 			echo "prodlike image just pushed"
-			sleep 10
+			sleep 30
 			sh "docker ps -a"
     		break
     		
