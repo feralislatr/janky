@@ -171,39 +171,39 @@ def push(String env_app, String git_sha, String repo_name) {
     		//build and push image
     		echo"env is: minc"
     		//sh ("/bin/bash /var/lib/jenkins/scripts/docker-build-pipeline2.sh $repo_name $env_app $git_sha")
-    		def masterImg = docker.build "$dockerhub/srvnonproddocker/$repo_name:minc"
+    		def masterImg = docker.build "$dockerhub/srvnonproddocker/$repo_name:$env_app-$short_commit"
             masterImg.tag "$short_commit"
             masterImg.tag "$env_app"
 			//mincImg.inside{sh 'npm install'}
-			masterImg.push "minc"
+			masterImg.push "$env_app-$short_commit"
     		break
 
     	case "prodlike" :
     		echo "env is: prodlike"
 	    	//pull
 	    	//sh("docker pull $docker_hub/srvnonproddocker/$repo_name:minc")
-	    	masterImg.pull "minc"
+	    	masterImg.pull "minc-$short_commit"
 	    	//tag and push image
 	    	//sh ("docker tag $docker_hub/srvnonproddocker/$repo_name:minc   $docker_hub/srvnonproddocker/$repo_name:$env_app")
 	    	//sh ("docker push $docker_hub/srvnonproddocker/$repo_name:$env_app")
-	    	masterImg.tag "$dockerhub/srvnonproddocker/$repo_name:$short_commit"
-            masterImg.tag "$dockerhub/srvnonproddocker/$repo_name:$env_app"
+	    	masterImg.tag "$dockerhub/srvnonproddocker/$repo_name:$$env_app-$short_commit"
+            //masterImg.tag "$dockerhub/srvnonproddocker/$repo_name:$env_app"
 			//mincImg.inside{sh 'npm install'}
-			masterImg.push "prodlike"
+			masterImg.push "$env_app-$short_commit"
     		break
     		
     	case "prod" :
     		echo "env is: prod"
 	    	//pull
 	    	//sh("docker pull $docker_hub/srvnonproddocker/$repo_name:prodlike")
-	    	masterImg.pull "prodlike"
+	    	masterImg.pull "prodlike-$short_commit"
 	    	//tag and push image
 	    	//sh ("docker tag $docker_hub/srvnonproddocker/$repo_name:minc   $docker_hub/srvnonproddocker/$repo_name:$env_app")
 	    	//sh ("docker push $docker_hub/srvnonproddocker/$repo_name:$env_app")
-	    	masterImg.tag "$dockerhub/srvnonproddocker/$repo_name:$short_commit"
-            masterImg.tag "$dockerhub/srvnonproddocker/$repo_name:$env_app"
+	    	masterImg.tag "$dockerhub/srvnonproddocker/$repo_name:$$env_app-$short_commit"
+            //masterImg.tag "$dockerhub/srvnonproddocker/$repo_name:$env_app"
 			//mincImg.inside{sh 'npm install'}
-			masterImg.push "prod"
+			masterImg.push "$env_app-$short_commit"
     		break	
     }
 
