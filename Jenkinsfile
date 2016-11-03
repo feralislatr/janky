@@ -153,6 +153,8 @@ def push(String env_app, String git_sha, String repo_name) {
     placeholder = env.JOB_NAME.split('/')
     def dockerhub = "dockerhub-app-01.east1e.nonprod.dmz"
     def short_commit="$git_sha".take(6)
+    repo_name = repo_name.toLowerCase();
+    echo "$repo_name"
 
     //repo_name cannot have underscores or uppercase letters
     //echo $repo_name | tr '[:upper:]' '[:lower:]' 
@@ -162,11 +164,9 @@ def push(String env_app, String git_sha, String repo_name) {
     		//build and push image
     		echo"env is: comp"
     		//sh ("/bin/bash /var/lib/jenkins/scripts/docker-build-pipeline2.sh $repo_name $env_app $git_sha")
-    		def devImg = docker.build "$dockerhub/srvnonproddocker/$repo_name:comp"
-			devImg.tag "$dockerhub/srvnonproddocker/$repo_name:$short_commit"
-            devImg.tag "$dockerhub/srvnonproddocker/$repo_name:$env_app"
-			//compImg.inside{sh 'npm install'}
-    		devImg.push "comp"
+    		def devImg = docker.build "srvnonproddocker/$repo_name:$env_app-$short_commit"
+			//devImg.inside{sh 'npm install'}
+    		devImg.push "$env_app-$short_commit"
     		break
 
     	case "minc" :
@@ -177,7 +177,7 @@ def push(String env_app, String git_sha, String repo_name) {
     		def masterImg = docker.build "srvnonproddocker/$repo_name:$env_app-$short_commit"
             //masterImg.tag "$short_commit"
             //masterImg.tag "$env_app"
-			//mincImg.inside{sh 'npm install'}
+			//masterImg.inside{sh 'npm install'}
 			masterImg.push "$env_app-$short_commit"
     		break
 
@@ -185,13 +185,13 @@ def push(String env_app, String git_sha, String repo_name) {
     		echo "env is: prodlike"
 	    	//pull
 	    	//sh("docker pull $docker_hub/srvnonproddocker/$repo_name:minc")
-	    	masterImg.pull "minc-$short_commit"
+	    	masterImg.pull "minc"
 	    	//tag and push image
 	    	//sh ("docker tag $docker_hub/srvnonproddocker/$repo_name:minc   $docker_hub/srvnonproddocker/$repo_name:$env_app")
 	    	//sh ("docker push $docker_hub/srvnonproddocker/$repo_name:$env_app")
-	    	masterImg.tag "$dockerhub/srvnonproddocker/$repo_name:$env_app-$short_commit"
+	    	masterImg.tag "$env_app-$short_commit"
             //masterImg.tag "$dockerhub/srvnonproddocker/$repo_name:$env_app"
-			//mincImg.inside{sh 'npm install'}
+			//masterImg.inside{sh 'npm install'}
 			masterImg.push "$env_app-$short_commit"
     		break
     		
@@ -199,13 +199,13 @@ def push(String env_app, String git_sha, String repo_name) {
     		echo "env is: prod"
 	    	//pull
 	    	//sh("docker pull $docker_hub/srvnonproddocker/$repo_name:prodlike")
-	    	masterImg.pull "prodlike-$short_commit"
+	    	masterImg.pull "prodlike"
 	    	//tag and push image
 	    	//sh ("docker tag $docker_hub/srvnonproddocker/$repo_name:minc   $docker_hub/srvnonproddocker/$repo_name:$env_app")
 	    	//sh ("docker push $docker_hub/srvnonproddocker/$repo_name:$env_app")
-	    	masterImg.tag "$dockerhub/srvnonproddocker/$repo_name:$env_app-$short_commit"
+	    	masterImg.tag "$env_app-$short_commit"
             //masterImg.tag "$dockerhub/srvnonproddocker/$repo_name:$env_app"
-			//mincImg.inside{sh 'npm install'}
+			//masterImg.inside{sh 'npm install'}
 			masterImg.push "$env_app-$short_commit"
     		break	
     }
