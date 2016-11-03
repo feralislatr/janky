@@ -155,7 +155,7 @@ def push(String env_app, String git_sha, String repo_name) {
     def short_commit="$git_sha".take(6)
     repo_name = repo_name.toLowerCase();
     echo "$repo_name"
-    def masterImg
+    //def masterImg
 
     //repo_name cannot have underscores or uppercase letters
     //echo $repo_name | tr '[:upper:]' '[:lower:]' 
@@ -166,7 +166,7 @@ def push(String env_app, String git_sha, String repo_name) {
     		//build and push image
     		def devImg = docker.build "srvnonproddocker/$repo_name:$env_app-$short_commit"
 			//devImg.inside{sh 'npm install'}
-    		devImg.push "$env_app-$short_commit"
+    		devImg.push "$comp-$short_commit"
     		break
 
     	case "minc" :
@@ -174,10 +174,10 @@ def push(String env_app, String git_sha, String repo_name) {
     		echo"env is: minc"
     		//sh ("/bin/bash /var/lib/jenkins/scripts/docker-build-pipeline2.sh $repo_name $env_app $git_sha")
     		//$dockerhub/srvnonproddocker/
-    		masterImg = docker.build "srvnonproddocker/$repo_name:$env_app-$short_commit"
+    		def masterImg = docker.build "srvnonproddocker/$repo_name:$env_app-$short_commit"
     		print masterImg.id
 			//masterImg.inside{sh 'npm install'}
-			masterImg.push "$env_app-$short_commit"
+			masterImg.push "$minc-$short_commit"
 			echo "minc image just pushed"
 			sleep 10
 			sh "docker ps -a"
@@ -186,7 +186,7 @@ def push(String env_app, String git_sha, String repo_name) {
     	case "prodlike" :
     		echo "env is: prodlike"
 	    	//use previously pushed image
-	    	masterImg = docker.image("srvnonproddocker/$repo_name:minc-$short_commit")
+	    	def masterImg = docker.image("srvnonproddocker/$repo_name:minc-$short_commit")
 	    	print masterImg.id
 	    	//tag with prodlike
 	    	masterImg.tag "prodlike-$short_commit"
@@ -201,13 +201,13 @@ def push(String env_app, String git_sha, String repo_name) {
     	case "prod" :
     		echo "env is: prod"
 	    	//use previously pushed image
-	 		masterImg = docker.image("srvnonproddocker/$repo_name:prodlike-$short_commit")
+	 		def masterImg = docker.image("srvnonproddocker/$repo_name:prodlike-$short_commit")
 	   	   	print masterImg.id
 	    	//tag with prod
 	    	masterImg.tag "$env_app-$short_commit"
 			//masterImg.inside{sh 'npm install'}
 			//push re-tagged image to dockerhub
-			masterImg.push "$env_app-$short_commit"
+			masterImg.push "$prod-$short_commit"
     		break	
     }
     return masterImg
