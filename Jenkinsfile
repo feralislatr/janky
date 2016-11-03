@@ -174,7 +174,7 @@ def push(String env_app, String git_sha, String repo_name) {
     		echo"env is: minc"
     		//sh ("/bin/bash /var/lib/jenkins/scripts/docker-build-pipeline2.sh $repo_name $env_app $git_sha")
     		//$dockerhub/srvnonproddocker/
-    		def masterImg = docker.build "$repo_name:$env_app-$short_commit"
+    		def masterImg = docker.build "srvnonproddocker/$repo_name:$env_app-$short_commit"
             //masterImg.tag "$short_commit"
             //masterImg.tag "$env_app"
 			//mincImg.inside{sh 'npm install'}
