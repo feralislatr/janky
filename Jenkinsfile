@@ -186,7 +186,7 @@ def push(String env_app, String git_sha, String repo_name) {
 	    	//tag and push image
 	    	//sh ("docker tag $docker_hub/srvnonproddocker/$repo_name:minc   $docker_hub/srvnonproddocker/$repo_name:$env_app")
 	    	//sh ("docker push $docker_hub/srvnonproddocker/$repo_name:$env_app")
-	    	masterImg.tag "$dockerhub/srvnonproddocker/$repo_name:$$env_app-$short_commit"
+	    	masterImg.tag "$dockerhub/srvnonproddocker/$repo_name:$env_app-$short_commit"
             //masterImg.tag "$dockerhub/srvnonproddocker/$repo_name:$env_app"
 			//mincImg.inside{sh 'npm install'}
 			masterImg.push "$env_app-$short_commit"
@@ -200,7 +200,7 @@ def push(String env_app, String git_sha, String repo_name) {
 	    	//tag and push image
 	    	//sh ("docker tag $docker_hub/srvnonproddocker/$repo_name:minc   $docker_hub/srvnonproddocker/$repo_name:$env_app")
 	    	//sh ("docker push $docker_hub/srvnonproddocker/$repo_name:$env_app")
-	    	masterImg.tag "$dockerhub/srvnonproddocker/$repo_name:$$env_app-$short_commit"
+	    	masterImg.tag "$dockerhub/srvnonproddocker/$repo_name:$env_app-$short_commit"
             //masterImg.tag "$dockerhub/srvnonproddocker/$repo_name:$env_app"
 			//mincImg.inside{sh 'npm install'}
 			masterImg.push "$env_app-$short_commit"
