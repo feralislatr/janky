@@ -19,7 +19,7 @@ node('master') {
 			        	def repogex = ".+/(.+)/.+"
                   		String repo_name = (env.JOB_NAME =~ repogex)[0][1]
 						echo "$repo_name"
-			        step 'Propose Merge'
+			        stage 'Propose Merge'
 			        //Merge Code
 			        	try {
 			        		sh "git branch -D temp"
@@ -153,7 +153,7 @@ def push(String env_app, String git_sha, String repo_name) {
     placeholder = env.JOB_NAME.split('/')
     def dockerhub = "dockerhub-app-01.east1e.nonprod.dmz"
     def short_commit=$git_sha.take(6)
-    
+
     switch (env_app){
     	case "comp" :
     		//build and push image
