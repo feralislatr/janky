@@ -154,6 +154,8 @@ def push(String env_app, String git_sha, String repo_name) {
     def dockerhub = "dockerhub-app-01.east1e.nonprod.dmz"
     def short_commit="$git_sha".take(6)
 
+    //repo_name cannot have underscores or uppercase letters
+
     switch (env_app){
     	case "comp" :
     		//build and push image
@@ -171,9 +173,10 @@ def push(String env_app, String git_sha, String repo_name) {
     		//build and push image
     		echo"env is: minc"
     		//sh ("/bin/bash /var/lib/jenkins/scripts/docker-build-pipeline2.sh $repo_name $env_app $git_sha")
+    		echo $env.BRANCH_NAME | tr '[:upper:]' '[:lower:]' 
     		def masterImg = docker.build "$dockerhub/srvnonproddocker/$repo_name:$env_app-$short_commit"
-            masterImg.tag "$short_commit"
-            masterImg.tag "$env_app"
+            //masterImg.tag "$short_commit"
+            //masterImg.tag "$env_app"
 			//mincImg.inside{sh 'npm install'}
 			masterImg.push "$env_app-$short_commit"
     		break
