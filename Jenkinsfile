@@ -164,9 +164,9 @@ def push(String env_app, String git_sha, String repo_name) {
     	case "comp" :
     		echo"env is: comp"
     		//build and push image
-    		def devImg = docker.build "srvnonproddocker/$repo_name:$env_app-$short_commit"
+    		def devImg = docker.build("srvnonproddocker/$repo_name:$env_app-$short_commit")
 			//devImg.inside{sh 'npm install'}
-    		devImg.push "$comp-$short_commit"
+    		devImg.push("$comp-$short_commit")
     		break
 
     	case "minc" :
@@ -174,11 +174,11 @@ def push(String env_app, String git_sha, String repo_name) {
     		echo"env is: minc"
     		//sh ("/bin/bash /var/lib/jenkins/scripts/docker-build-pipeline2.sh $repo_name $env_app $git_sha")
     		//$dockerhub/srvnonproddocker/
-    		def masterImg = docker.build "srvnonproddocker/$repo_name:$env_app-$short_commit"
-    		print masterImg.id
+    		def masterImg = docker.build("srvnonproddocker/$repo_name:$env_app-$short_commit")
 			//masterImg.inside{sh 'npm install'}
-			masterImg.push "minc-$short_commit"
+			masterImg.push("minc-$short_commit")
 			echo "minc image just pushed"
+			print masterImg.id
 			sleep 10
     		break
 
@@ -188,10 +188,10 @@ def push(String env_app, String git_sha, String repo_name) {
 	    	def masterImg = docker.image("srvnonproddocker/$repo_name:minc-$short_commit")
 	    	print masterImg.id
 	    	//tag with prodlike
-	    	masterImg.tag "prodlike-$short_commit"
+	    	masterImg.tag("prodlike-$short_commit")
 			//masterImg.inside{sh 'npm install'}
 			//push re-tagged image to dockerhub
-			masterImg.push "prodlike-$short_commit"
+			masterImg.push("prodlike-$short_commit")
 			echo "prodlike image just pushed"
 			sleep 30
     		break
@@ -202,10 +202,10 @@ def push(String env_app, String git_sha, String repo_name) {
 	 		def masterImg = docker.image("srvnonproddocker/$repo_name:prodlike-$short_commit")
 	   	   	print masterImg.id
 	    	//tag with prod
-	    	masterImg.tag "$env_app-$short_commit"
+	    	masterImg.tag("prod-$short_commit")
 			//masterImg.inside{sh 'npm install'}
 			//push re-tagged image to dockerhub
-			masterImg.push "$prod-$short_commit"
+			masterImg.push("$prod-$short_commit")
     		break	
     }
 
