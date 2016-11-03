@@ -155,7 +155,7 @@ def push(String env_app, String git_sha, String repo_name) {
     def short_commit="$git_sha".take(6)
     repo_name = repo_name.toLowerCase();
     echo "$repo_name"
-    //def masterImg
+    def masterImg
 
     //repo_name cannot have underscores or uppercase letters
     //echo $repo_name | tr '[:upper:]' '[:lower:]' 
@@ -185,35 +185,27 @@ def push(String env_app, String git_sha, String repo_name) {
 
     	case "prodlike" :
     		echo "env is: prodlike"
-	    	//pull
-	    	//sh("docker pull $docker_hub/srvnonproddocker/$repo_name:minc")
-	    	//masterImg = docker.pull "$repo_name" 
-	    	def masterImg = docker.image("srvnonproddocker/$repo_name:minc-$short_commit")
-	    	//tag and push image
-	    	//sh ("docker tag $docker_hub/srvnonproddocker/$repo_name:minc   $docker_hub/srvnonproddocker/$repo_name:$env_app")
-	    	//sh ("docker push $docker_hub/srvnonproddocker/$repo_name:$env_app")
+	    	//use previously pushed image
+	    	masterImg = docker.image("srvnonproddocker/$repo_name:minc-$short_commit")
+	    	print masterImg.id
+	    	//tag with prodlike
 	    	masterImg.tag "$env_app-$short_commit"
-            //masterImg.tag "$dockerhub/srvnonproddocker/$repo_name:$env_app"
 			//masterImg.inside{sh 'npm install'}
+			//push re-tagged image to dockerhub
 			masterImg.push "$env_app-$short_commit"
     		break
     		
     	case "prod" :
     		echo "env is: prod"
-	    	//pull
-	    	//sh("docker pull $docker_hub/srvnonproddocker/$repo_name:prodlike")
-	    	masterImg.pull "prodlike"
-	    	//tag and push image
-	    	//sh ("docker tag $docker_hub/srvnonproddocker/$repo_name:minc   $docker_hub/srvnonproddocker/$repo_name:$env_app")
-	    	//sh ("docker push $docker_hub/srvnonproddocker/$repo_name:$env_app")
+	    	//use previously pushed image
+	    	masterImg = docker.image("srvnonproddocker/$repo_name:prodlike-$short_commit")
+	    	print masterImg.id
+	    	//tag with prod
 	    	masterImg.tag "$env_app-$short_commit"
-            //masterImg.tag "$dockerhub/srvnonproddocker/$repo_name:$env_app"
 			//masterImg.inside{sh 'npm install'}
+			//push re-tagged image to dockerhub
 			masterImg.push "$env_app-$short_commit"
     		break	
-
-    	default:
-    		masterImg = docker.build "srvnonproddocker/$repo_name:$env_app-$short_commit"
     }
     return masterImg
 
