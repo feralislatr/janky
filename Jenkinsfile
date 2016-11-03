@@ -177,7 +177,7 @@ def push(String env_app, String git_sha, String repo_name) {
     		def masterImg = docker.build "srvnonproddocker/$repo_name:$env_app-$short_commit"
     		print masterImg.id
 			//masterImg.inside{sh 'npm install'}
-			masterImg.push "$minc-$short_commit"
+			masterImg.push "minc-$short_commit"
 			echo "minc image just pushed"
 			sleep 10
 			sh "docker ps -a"
