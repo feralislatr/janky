@@ -180,7 +180,6 @@ def push(String env_app, String git_sha, String repo_name) {
 			masterImg.push "minc-$short_commit"
 			echo "minc image just pushed"
 			sleep 10
-			sh "docker ps -a"
     		break
 
     	case "prodlike" :
@@ -195,7 +194,6 @@ def push(String env_app, String git_sha, String repo_name) {
 			masterImg.push "prodlike-$short_commit"
 			echo "prodlike image just pushed"
 			sleep 30
-			sh "docker ps -a"
     		break
     		
     	case "prod" :
@@ -210,7 +208,6 @@ def push(String env_app, String git_sha, String repo_name) {
 			masterImg.push "$prod-$short_commit"
     		break	
     }
-    return masterImg
 
 }
 
