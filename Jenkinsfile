@@ -188,7 +188,7 @@ def push(String env_app, String git_sha, String repo_name) {
 	    	masterImg = docker.image("srvnonproddocker/$repo_name:minc-$short_commit")
 	    	print masterImg.id
 	    	//tag with prodlike
-	    	masterImg.tag "$prodlike-$short_commit"
+	    	masterImg.tag "prodlike-$short_commit"
 			//masterImg.inside{sh 'npm install'}
 			//push re-tagged image to dockerhub
 			masterImg.push "prodlike-$short_commit"
