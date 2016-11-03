@@ -155,6 +155,7 @@ def push(String env_app, String git_sha, String repo_name) {
     def short_commit="$git_sha".take(6)
 
     //repo_name cannot have underscores or uppercase letters
+    //echo $repo_name | tr '[:upper:]' '[:lower:]' 
 
     switch (env_app){
     	case "comp" :
@@ -162,7 +163,6 @@ def push(String env_app, String git_sha, String repo_name) {
     		echo"env is: comp"
     		//sh ("/bin/bash /var/lib/jenkins/scripts/docker-build-pipeline2.sh $repo_name $env_app $git_sha")
     		def devImg = docker.build "$dockerhub/srvnonproddocker/$repo_name:comp"
-    		
 			devImg.tag "$dockerhub/srvnonproddocker/$repo_name:$short_commit"
             devImg.tag "$dockerhub/srvnonproddocker/$repo_name:$env_app"
 			//compImg.inside{sh 'npm install'}
@@ -173,7 +173,6 @@ def push(String env_app, String git_sha, String repo_name) {
     		//build and push image
     		echo"env is: minc"
     		//sh ("/bin/bash /var/lib/jenkins/scripts/docker-build-pipeline2.sh $repo_name $env_app $git_sha")
-    		echo $env.BRANCH_NAME | tr '[:upper:]' '[:lower:]' 
     		def masterImg = docker.build "$dockerhub/srvnonproddocker/$repo_name:$env_app-$short_commit"
             //masterImg.tag "$short_commit"
             //masterImg.tag "$env_app"
