@@ -155,7 +155,7 @@ def push(String env_app, String git_sha, String repo_name) {
     def short_commit="$git_sha".take(6)
     repo_name = repo_name.toLowerCase();
     echo "$repo_name"
-    def masterImg
+    //def masterImg
 
     //repo_name cannot have underscores or uppercase letters
     //echo $repo_name | tr '[:upper:]' '[:lower:]' 
@@ -188,7 +188,7 @@ def push(String env_app, String git_sha, String repo_name) {
 	    	//pull
 	    	//sh("docker pull $docker_hub/srvnonproddocker/$repo_name:minc")
 	    	//masterImg = docker.pull "$repo_name" 
-	    	docker.pull "srvnonproddocker/$repo_name:minc-$short_commit"
+	    	def masterImg = docker.pull "srvnonproddocker/$repo_name:minc-$short_commit"
 	    	//tag and push image
 	    	//sh ("docker tag $docker_hub/srvnonproddocker/$repo_name:minc   $docker_hub/srvnonproddocker/$repo_name:$env_app")
 	    	//sh ("docker push $docker_hub/srvnonproddocker/$repo_name:$env_app")
