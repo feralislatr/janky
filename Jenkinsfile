@@ -181,7 +181,7 @@ def push(String env_app, String git_sha, String repo_name) {
             //masterImg.tag "$env_app"
 			//masterImg.inside{sh 'npm install'}
 			masterImg.push "$env_app-$short_commit"
-    		breaka
+    		break
 
     	case "prodlike" :
     		echo "env is: prodlike"
