@@ -155,7 +155,7 @@ def push(String env_app, String git_sha, String repo_name) {
     def short_commit="$git_sha".take(6)
     repo_name = repo_name.toLowerCase();
     echo "$repo_name"
-    def masterImg = null
+    def masterImg
 
     //repo_name cannot have underscores or uppercase letters
     //echo $repo_name | tr '[:upper:]' '[:lower:]' 
@@ -181,7 +181,7 @@ def push(String env_app, String git_sha, String repo_name) {
             //masterImg.tag "$env_app"
 			//masterImg.inside{sh 'npm install'}
 			masterImg.push "$env_app-$short_commit"
-    		break
+    		breaka
 
     	case "prodlike" :
     		echo "env is: prodlike"
@@ -211,7 +211,11 @@ def push(String env_app, String git_sha, String repo_name) {
 			//masterImg.inside{sh 'npm install'}
 			masterImg.push "$env_app-$short_commit"
     		break	
+
+    	default:
+    		masterImg = docker.build "srvnonproddocker/$repo_name:$env_app-$short_commit"
     }
+    return masterImg
 
 }
 
