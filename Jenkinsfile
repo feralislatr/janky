@@ -16,11 +16,10 @@ node('master') {
 			       	stage 'Prepare the environment'
 			       	stage 'Detemining a Target Branch'
 			        	def target_branch = env.CHANGE_TARGET
-
 			        	def repogex = ".+/(.+)/.+"
                   		String repo_name = (env.JOB_NAME =~ repogex)[0][1]
 						echo "$repo_name"
-			        stage 'Propose Merge'
+			        step 'Propose Merge'
 			        //Merge Code
 			        	try {
 			        		sh "git branch -D temp"
@@ -63,7 +62,7 @@ node('master') {
 							    //Push merged code after deployment
 								stage 'Merge Pull Request'
 									echo "$repo_name"
-									sh "git remote set-url origin https://brianaslaterADM:144ce55e20843484ef8a84f774df5088ca72dd83@csp-github.micropaas.io/Pipeline/${repo_name}.git"
+									sh "git remote set-url origin https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/Pipeline/${repo_name}.git"
 								    sh "git pull"
 									sh "git push origin $target_branch"
 
@@ -109,7 +108,7 @@ node('master') {
 					           	}
 						} catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException err) {
 					        	print "Error I am in the "
-					           	sh("curl -XPOST -H 'Content-Type: application/json' -d '{\"body\": \"CI/CD could not finish the deployment process because the Deployment has been **Aborted**.\"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
+					           	sh("curl -XPOST -H 'Content-Type: application/json' -d '{\"body\": \"CI/CD could not finish the deployment process because it has been **Aborted**.\"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
 					            	throw err
 					       	}
 			         	} else { //Run tests on push to a feature branch
@@ -122,7 +121,7 @@ node('master') {
 		      	} catch (err) {
 		        	print "An error happened:"
 		     		print err
-		        	sh("curl -XPOST -H 'Content-Type: application/json' -d '{\"body\": \"CI/CD could not finish the deployment process because the Folowing error: <br > ${err} \"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
+		        	sh("curl -XPOST -H 'Content-Type: application/json' -d '{\"body\": \"CI/CD could not finish the deployment process because of the following error: <br > ${err} \"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
 		      	}
 		      	
 			}
@@ -152,39 +151,65 @@ def deploy(String env_app, String github_pull_req, String repo_name) {
 //changed env_param to env_app
 def push(String env_app, String git_sha, String repo_name) {
     placeholder = env.JOB_NAME.split('/')
-    def docker_hub = "dockerhub-app-01.east1e.nonprod.dmz"
+    def dockerhub = "dockerhub-app-01.east1e.nonprod.dmz"
+    def short_commit=$git_sha.take(6)
     
     switch (env_app){
     	case "comp" :
     		//build and push image
     		echo"env is: comp"
-    		sh ("/bin/bash /var/lib/jenkins/scripts/docker-build-pipeline2.sh $repo_name $env_app $git_sha")
+    		//sh ("/bin/bash /var/lib/jenkins/scripts/docker-build-pipeline2.sh $repo_name $env_app $git_sha")
+    		def devImg = docker.build "$dockerhub/srvnonproddocker/$repo_name:comp"
+    		
+			devImg.tag "$dockerhub/srvnonproddocker/$repo_name:$short_commit"
+            devImg.tag "$dockerhub/srvnonproddocker/$repo_name:$env_app"
+			//compImg.inside{sh 'npm install'}
+    		devImg.push "comp"
     		break
-    	case "minc":
+
+    	case "minc" :
     		//build and push image
     		echo"env is: minc"
-    		sh ("/bin/bash /var/lib/jenkins/scripts/docker-build-pipeline2.sh $repo_name $env_app $git_sha")
+    		//sh ("/bin/bash /var/lib/jenkins/scripts/docker-build-pipeline2.sh $repo_name $env_app $git_sha")
+    		def masterImg = docker.build "$dockerhub/srvnonproddocker/$repo_name:minc"
+            masterImg.tag "$dockerhub/srvnonproddocker/$repo_name:$short_commit"
+            masterImg.tag "$dockerhub/srvnonproddocker/$repo_name:$env_app"
+			//mincImg.inside{sh 'npm install'}
+			masterImg.push "minc"
     		break
+
     	case "prodlike" :
     		echo "env is: prodlike"
 	    	//pull
-	    	sh("docker pull $docker_hub/srvnonproddocker/$repo_name:minc")
+	    	//sh("docker pull $docker_hub/srvnonproddocker/$repo_name:minc")
+	    	masterImg.pull "minc"
 	    	//tag and push image
-	    	sh ("docker tag $docker_hub/srvnonproddocker/$repo_name:minc   $docker_hub/srvnonproddocker/$repo_name:$env_app")
-	    	sh ("docker push $docker_hub/srvnonproddocker/$repo_name:$env_app")
+	    	//sh ("docker tag $docker_hub/srvnonproddocker/$repo_name:minc   $docker_hub/srvnonproddocker/$repo_name:$env_app")
+	    	//sh ("docker push $docker_hub/srvnonproddocker/$repo_name:$env_app")
+	    	masterImg.tag "$dockerhub/srvnonproddocker/$repo_name:$short_commit"
+            masterImg.tag "$dockerhub/srvnonproddocker/$repo_name:$env_app"
+			//mincImg.inside{sh 'npm install'}
+			masterImg.push "prodlike"
     		break
+    		
     	case "prod" :
     		echo "env is: prod"
 	    	//pull
-	    	sh("docker pull $docker_hub/srvnonproddocker/$repo_name:prodlike")
+	    	//sh("docker pull $docker_hub/srvnonproddocker/$repo_name:prodlike")
+	    	masterImg.pull "prodlike"
 	    	//tag and push image
-	    	sh ("docker tag $docker_hub/srvnonproddocker/$repo_name:prodlike   $docker_hub/srvnonproddocker/$repo_name:$env_app")
-	    	sh ("docker push $docker_hub/srvnonproddocker/$repo_name:$env_app")
-	    	sh ("/bin/bash /var/lib/jenkins/scripts/docker-tag-pipeline.sh $repo_name $env_app $git_sha")
+	    	//sh ("docker tag $docker_hub/srvnonproddocker/$repo_name:minc   $docker_hub/srvnonproddocker/$repo_name:$env_app")
+	    	//sh ("docker push $docker_hub/srvnonproddocker/$repo_name:$env_app")
+	    	masterImg.tag "$dockerhub/srvnonproddocker/$repo_name:$short_commit"
+            masterImg.tag "$dockerhub/srvnonproddocker/$repo_name:$env_app"
+			//mincImg.inside{sh 'npm install'}
+			masterImg.push "prod"
     		break	
     }
 
 }
+
+
 
 //Display input steps that ask the user to approve or abort a deployment to each environment
 def askApproval(String env_app, String lambda_url, String jenkins_pr_url, String github_pull_req) {
