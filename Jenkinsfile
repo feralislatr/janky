@@ -179,6 +179,7 @@ def push(String env_app, String git_sha, String repo_name) {
 			//masterImg.inside{sh 'npm install'}
 			masterImg.push "$env_app-$short_commit"
 			echo "minc image just pushed"
+			sleep 10
 			sh "docker ps -a"
     		break
 
@@ -193,18 +194,17 @@ def push(String env_app, String git_sha, String repo_name) {
 			//push re-tagged image to dockerhub
 			masterImg.push "prodlike-$short_commit"
 			echo "prodlike image just pushed"
+			sleep 10
 			sh "docker ps -a"
     		break
     		
     	case "prod" :
     		echo "env is: prod"
 	    	//use previously pushed image
-	    	waitUntil{
-	   	    	masterImg = docker.image("srvnonproddocker/$repo_name:prodlike-$short_commit")
-	   	    }
-	    	print masterImg.id
+	 		masterImg = docker.image("srvnonproddocker/$repo_name:prodlike-$short_commit")
+	   	   	print masterImg.id
 	    	//tag with prod
-	    	//masterImg.tag "$env_app-$short_commit"
+	    	masterImg.tag "$env_app-$short_commit"
 			//masterImg.inside{sh 'npm install'}
 			//push re-tagged image to dockerhub
 			masterImg.push "$env_app-$short_commit"
