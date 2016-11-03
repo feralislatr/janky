@@ -162,9 +162,8 @@ def push(String env_app, String git_sha, String repo_name) {
 
     switch (env_app){
     	case "comp" :
-    		//build and push image
     		echo"env is: comp"
-    		//sh ("/bin/bash /var/lib/jenkins/scripts/docker-build-pipeline2.sh $repo_name $env_app $git_sha")
+    		//build and push image
     		def devImg = docker.build "srvnonproddocker/$repo_name:$env_app-$short_commit"
 			//devImg.inside{sh 'npm install'}
     		devImg.push "$env_app-$short_commit"
@@ -177,10 +176,10 @@ def push(String env_app, String git_sha, String repo_name) {
     		//$dockerhub/srvnonproddocker/
     		masterImg = docker.build "srvnonproddocker/$repo_name:$env_app-$short_commit"
     		print masterImg.id
-            //masterImg.tag "$short_commit"
-            //masterImg.tag "$env_app"
 			//masterImg.inside{sh 'npm install'}
 			masterImg.push "$env_app-$short_commit"
+			echo "minc image just pushed"
+			sh "docker ps -a"
     		break
 
     	case "prodlike" :
@@ -189,10 +188,12 @@ def push(String env_app, String git_sha, String repo_name) {
 	    	masterImg = docker.image("srvnonproddocker/$repo_name:minc-$short_commit")
 	    	print masterImg.id
 	    	//tag with prodlike
-	    	masterImg.tag "$env_app-$short_commit"
+	    	masterImg.tag "$prodlike-$short_commit"
 			//masterImg.inside{sh 'npm install'}
 			//push re-tagged image to dockerhub
-			masterImg.push "$env_app-$short_commit"
+			masterImg.push "prodlike-$short_commit"
+			echo "prodlike image just pushed"
+			sh "docker ps -a"
     		break
     		
     	case "prod" :
