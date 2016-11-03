@@ -185,7 +185,7 @@ def push(String env_app, String git_sha, String repo_name) {
     		echo "env is: prodlike"
 	    	//pull
 	    	//sh("docker pull $docker_hub/srvnonproddocker/$repo_name:minc")
-	    	def masterImg = docker.pull "srvnonproddocker/$repo_name:minc-$short_commit"
+	    	def masterImg = docker.pull "$dockerhub/srvnonproddocker/$repo_name:minc-$short_commit"
 	    	//tag and push image
 	    	//sh ("docker tag $docker_hub/srvnonproddocker/$repo_name:minc   $docker_hub/srvnonproddocker/$repo_name:$env_app")
 	    	//sh ("docker push $docker_hub/srvnonproddocker/$repo_name:$env_app")
