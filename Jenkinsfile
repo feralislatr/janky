@@ -179,7 +179,7 @@ def push(String env_app, String git_sha, String repo_name) {
 			masterImg.push("minc-$short_commit")
 			echo "minc image just pushed"
 			print masterImg.id
-			sleep 10
+			//sleep 10
     		break
 
     	case "prodlike" :
@@ -193,7 +193,7 @@ def push(String env_app, String git_sha, String repo_name) {
 			//push re-tagged image to dockerhub
 			masterImg.push("prodlike-$short_commit")
 			echo "prodlike image just pushed"
-			sleep 30
+			//sleep 30
     		break
     		
     	case "prod" :
@@ -205,12 +205,12 @@ def push(String env_app, String git_sha, String repo_name) {
 	    	masterImg.tag("prod-$short_commit")
 			//masterImg.inside{sh 'npm install'}
 			//push re-tagged image to dockerhub
-			masterImg.push("$prod-$short_commit")
+			masterImg.push("prod-$short_commit")
     		break	
     }
 
 }
-
+//^^^^haven't tested this yet
 
 
 //Display input steps that ask the user to approve or abort a deployment to each environment
