@@ -60,14 +60,14 @@ node('master') {
 							            	 deploy(env_app, github_pull_req, repo_name)
 
 							    //Push merged code after deployment
-								stage 'Merge Pull Request'
-									echo "$repo_name"
-									sh "git remote set-url origin https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/Pipeline/${repo_name}.git"
-								    sh "git pull"
-									sh "git push origin $target_branch"
+								// stage 'Merge Pull Request'
+								// 	echo "$repo_name"
+								// 	sh "git remote set-url origin https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/Pipeline/${repo_name}.git"
+								//     sh "git pull"
+								// 	sh "git push origin $target_branch"
 
-									//This needs to become dynamic
-									sh("curl -XPOST -d '{\"state\": \"success\", \"context\": \"continuous-integration/jenkins/branch\"}' https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/api/v3/repos/Pipeline/test-sample-1/statuses/${git_sha}")
+								// 	//This needs to become dynamic
+								// 	sh("curl -XPOST -d '{\"state\": \"success\", \"context\": \"continuous-integration/jenkins/branch\"}' https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/api/v3/repos/Pipeline/test-sample-1/statuses/${git_sha}")
 									
 							//If pull request is to the master branch, deploy to minc, prodlike, or prod
 							} else if (target_branch == 'master'){
@@ -96,16 +96,27 @@ node('master') {
 						                 	deploy(env_app, github_pull_req, repo_name)
 
 						         		//Push merged code after deployment
-										stage 'Merge Pull Request'
-											echo "$repo_name"
-										    sh "git remote set-url origin https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/Pipeline/${repo_name}.git"
-										    sh "git pull"
-											sh "git push origin $target_branch"
+										// stage 'Merge Pull Request'
+										// 	echo "$repo_name"
+										//     sh "git remote set-url origin https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/Pipeline/${repo_name}.git"
+										//     sh "git pull"
+										// 	sh "git push origin $target_branch"
 
-											//This needs to become dynamic
-											sh("curl -XPOST -d '{\"state\": \"success\", \"context\": \"continuous-integration/jenkins/branch\"}' https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/api/v3/repos/Pipeline/test-sample-1/statuses/${git_sha}")
+										// 	//This needs to become dynamic
+										// 	sh("curl -XPOST -d '{\"state\": \"success\", \"context\": \"continuous-integration/jenkins/branch\"}' https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/api/v3/repos/Pipeline/test-sample-1/statuses/${git_sha}")
 							        	   		
 					           	}
+					           	//See if this merges for development, master, AND feature branches
+					           	stage 'Merge Pull Request'
+									echo "$repo_name"
+									sh "git remote set-url origin https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/Pipeline/${repo_name}.git"
+									sh "git pull"
+									sh "git push origin $target_branch"
+
+									//This needs to become dynamic
+									sh("curl -XPOST -d '{\"state\": \"success\", \"context\": \"continuous-integration/jenkins/branch\"}' https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/api/v3/repos/Pipeline/test-sample-1/statuses/${git_sha}")
+
+
 						} catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException err) {
 					        	print "Error I am in the "
 					           	sh("curl -XPOST -H 'Content-Type: application/json' -d '{\"body\": \"CI/CD could not finish the deployment process because it has been **Aborted**.\"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
@@ -117,6 +128,7 @@ node('master') {
 			         		stage 'Build the code'
 			         		stage 'Run the Unit tests'
 			         		//unit tests run by Dockerfile
+	
 			         	}
 		      	} catch (err) {
 		        	print "An error happened:"
@@ -185,7 +197,7 @@ def push(String env_app, String git_sha, String repo_name) {
     	case "prodlike" :
     		echo "env is: prodlike"
 	    	//use previously pushed image
-	    	def masterImg = docker.image("srvnonproddocker/$repo_name:minc-$short_commit")
+	    	def masterImg = docker.image("$dockerhub/srvnonproddocker/$repo_name:minc-$short_commit")
 	    	print masterImg.id
 	    	//tag with prodlike
 	    	masterImg.tag("prodlike-$short_commit")
@@ -199,7 +211,8 @@ def push(String env_app, String git_sha, String repo_name) {
     	case "prod" :
     		echo "env is: prod"
 	    	//use previously pushed image
-	 		def masterImg = docker.image("srvnonproddocker/$repo_name:prodlike-$short_commit")
+	    	sh "docker pull $prodlike-$short_commit"
+	 		def masterImg = docker.image("$dockerhub/srvnonproddocker/$repo_name:prodlike-$short_commit")
 	   	   	print masterImg.id
 	    	//tag with prod
 	    	masterImg.tag("prod-$short_commit")
@@ -210,7 +223,6 @@ def push(String env_app, String git_sha, String repo_name) {
     }
 
 }
-//^^^^haven't tested this yet
 
 
 //Display input steps that ask the user to approve or abort a deployment to each environment
