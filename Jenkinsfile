@@ -191,7 +191,6 @@ def push(String env_app, String git_sha, String repo_name) {
 			masterImg.push("minc-$short_commit")
 			echo "minc image just pushed"
 			print masterImg.id
-			//sleep 10
     		break
 
     	case "prodlike" :
@@ -206,14 +205,13 @@ def push(String env_app, String git_sha, String repo_name) {
 			//push re-tagged image to dockerhub
 			masterImg.push("prodlike-$short_commit")
 			echo "prodlike image just pushed"
-			//sleep 30
     		break
     		
     	case "prod" :
     		echo "env is: prod"
 	    	//use previously pushed image
 	    	//sh "docker pull $dockerhub/srvnonproddocker/prodlike-$short_commit"
-	 		def masterImg = docker.image("srvnonproddocker/$repo_name:prodlike-$short_commit")
+	 		def masterImg = docker.image("srvnonproddocker/$repo_name:minc-$short_commit")
 	   	   	masterImg.pull()
 	   	   	print masterImg.id
 	    	//tag with prod
@@ -233,28 +231,28 @@ def askApproval(String env_app, String lambda_url, String jenkins_pr_url, String
 	if(env_app == 'comp') {
 		print 'Deploying to component'
 	     	sh("curl -XPOST -H 'Content-Type: application/json' -d '{\"body\": \"Hello, this is the CI/CD pipeline<br >If you want deploy to **Component** please click on *Continue*. <br >If you want to stop the Deployment click on *Abort* <br >[![abort](https://s3.amazonaws.com/gsa-iae-hosting-public-files/public-files/abort.jpg)](${lambda_url}?jenkins_url=${jenkins_pr_url}&action=abort&env=DeployComp&redirect=${env.CHANGE_URL})         [![continue](https://s3.amazonaws.com/gsa-iae-hosting-public-files/public-files/continue.png)](${lambda_url}?jenkins_url=${jenkins_pr_url}&action=proceedEmpty&env=DeployComp&redirect=${env.CHANGE_URL}) \"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
-			timeout(time:14, unit:'DAYS') {
+			timeout(time:5, unit:'MINUTES') {
      			input(id: 'DeployComp', message: 'Deploy to Comp?')
      		}
      //Minc input steps
 	} else if(env_app == 'minc') {
 		print 'Deploying to minimum-capacity'
      	  	sh("curl -XPOST -H 'Content-Type: application/json' -d '{\"body\": \"Hello, this is the CI/CD pipeline<br >If you want deploy to **MINIMUM-CAPACITY** please click on *Continue*. <br >If you want to stop the Deployment click on *Abort* <br >[![abort](https://s3.amazonaws.com/gsa-iae-hosting-public-files/public-files/abort.jpg)](${lambda_url}?jenkins_url=${jenkins_pr_url}&action=abort&env=DeployMinc&redirect=${env.CHANGE_URL})         [![continue](https://s3.amazonaws.com/gsa-iae-hosting-public-files/public-files/continue.png)](${lambda_url}?jenkins_url=${jenkins_pr_url}&action=proceedEmpty&env=DeployMinc&redirect=${env.CHANGE_URL}) \"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
-     		timeout(time:14, unit:'DAYS') {
+     		timeout(time:5, unit:'MINUTES') {
      			input(id: 'DeployMinc', message: 'Deploy to Minc?')
      		}
      //Prodlike input steps
 	} else if(env_app == 'prodlike') {
 		print 'Deploying to prod-like'
 			sh("curl -XPOST -H 'Content-Type: application/json' -d '{\"body\": \"Hello, this is the CI/CD pipeline<br >If you want deploy to **PRODUCTION-LIKE** please click on *Continue*. <br >If you want to stop the Deployment click on *Abort* <br >[![abort](https://s3.amazonaws.com/gsa-iae-hosting-public-files/public-files/abort.jpg)](${lambda_url}?jenkins_url=${jenkins_pr_url}&action=abort&env=DeployProdLike&redirect=${env.CHANGE_URL})         [![continue](https://s3.amazonaws.com/gsa-iae-hosting-public-files/public-files/continue.png)](${lambda_url}?jenkins_url=${jenkins_pr_url}&action=proceedEmpty&env=DeployProdLike&redirect=${env.CHANGE_URL}) \"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
-			timeout(time:14, unit:'DAYS') {
+			timeout(time:5, unit:'MINUTES') {
      			input(id: 'DeployProdLike', message: 'Deploy to Prod-Like?')
      		}
      //Prod input steps
 	} else if(env_app == 'prod') {
 		print 'Deploying to prod'
      		sh("curl -XPOST -H 'Content-Type: application/json' -d '{\"body\": \"Hello, this is the CI/CD pipeline<br >If you want deploy to **PRODUCTION** please click on *Continue*. <br >If you want to stop the Deployment click on *Abort* <br >[![abort](https://s3.amazonaws.com/gsa-iae-hosting-public-files/public-files/abort.jpg)](${lambda_url}?jenkins_url=${jenkins_pr_url}&action=abort&env=DeployProd&redirect=${env.CHANGE_URL})         [![continue](https://s3.amazonaws.com/gsa-iae-hosting-public-files/public-files/continue.png)](${lambda_url}?jenkins_url=${jenkins_pr_url}&action=proceedEmpty&env=DeployProd&redirect=${env.CHANGE_URL}) \"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
-			timeout(time:14, unit:'DAYS') {
+			timeout(time:5, unit:'MINUTES') {
      			input(id: 'DeployProd', message: 'Deploy to Prod?')
      		}
 	}
