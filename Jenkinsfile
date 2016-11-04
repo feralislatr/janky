@@ -212,7 +212,7 @@ def push(String env_app, String git_sha, String repo_name) {
     	case "prod" :
     		echo "env is: prod"
 	    	//use previously pushed image
-	    	sh "docker pull prodlike-$short_commit"
+	    	sh "docker pull $dockerhub/srvnonproddocker/prodlike-$short_commit"
 	 		def masterImg = docker.image("srvnonproddocker/$repo_name:prodlike-$short_commit")
 	   	   	print masterImg.id
 	    	//tag with prod
