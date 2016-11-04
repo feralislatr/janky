@@ -214,6 +214,7 @@ def push(String env_app, String git_sha, String repo_name) {
 	    	//use previously pushed image
 	    	sh "docker pull $dockerhub/srvnonproddocker/prodlike-$short_commit"
 	 		def masterImg = docker.image("srvnonproddocker/$repo_name:prodlike-$short_commit")
+	   	   	masterImg.pull()
 	   	   	print masterImg.id
 	    	//tag with prod
 	    	masterImg.tag("prod-$short_commit")
