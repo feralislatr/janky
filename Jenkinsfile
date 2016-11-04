@@ -186,7 +186,8 @@ def push(String env_app, String git_sha, String repo_name) {
     		echo"env is: minc"
     		//sh ("/bin/bash /var/lib/jenkins/scripts/docker-build-pipeline2.sh $repo_name $env_app $git_sha")
     		//$dockerhub/srvnonproddocker/
-    		def masterImg = docker.build("srvnonproddocker/$repo_name:$env_app-$short_commit")
+    		def masterImg = docker.build("srvnonproddocker/$repo_name:base")
+    		masterImg.tag("minc-$short_commit")
 			echo "tell me the id"
     		print masterImg.id
 			//masterImg.inside{sh 'npm install'}
@@ -198,11 +199,12 @@ def push(String env_app, String git_sha, String repo_name) {
     	case "prodlike" :
     		echo "env is: prodlike"
 	    	//use previously pushed image
-	    	def masterImg = docker.build("srvnonproddocker/$repo_name:prodlike-$short_commit")
+	    	//def masterImg = docker.build("srvnonproddocker/$repo_name:prodlike-$short_commit")
+	    	def masterImg = docker.image("srvnonproddocker/$repo_name:base")
+    		//tag with prodlike
+	    	masterImg.tag("prodlike-$short_commit")
 	    	echo "tell me the id"
 	    	print masterImg.id
-	    	//tag with prodlike
-	    	masterImg.tag("prodlike-$short_commit")
 			//masterImg.inside{sh 'npm install'}
 			//push re-tagged image to dockerhub
 			masterImg.push("prodlike-$short_commit")
@@ -213,12 +215,11 @@ def push(String env_app, String git_sha, String repo_name) {
     		echo "env is: prod"
 	    	//use previously pushed image
 	    	//sh "docker pull $dockerhub/srvnonproddocker/prodlike-$short_commit"
-	 		def masterImg = docker.image("srvnonproddocker/$repo_name:prodlike-$short_commit")
-	   	   	//masterImg.pull()
-	   	   	echo "tell me the id"
-	   	   	print masterImg.id
+	 		def masterImg = docker.image("srvnonproddocker/$repo_name:base")
 	    	//tag with prod
 	    	masterImg.tag("prod-$short_commit")
+	   	   	echo "tell me the id"
+	   	   	print masterImg.id
 			//masterImg.inside{sh 'npm install'}
 			//push re-tagged image to dockerhub
 			masterImg.push("prod-$short_commit")
