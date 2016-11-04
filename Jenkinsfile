@@ -198,7 +198,7 @@ def push(String env_app, String git_sha, String repo_name) {
     	case "prodlike" :
     		echo "env is: prodlike"
 	    	//use previously pushed image
-	    	def masterImg = docker.image("srvnonproddocker/$repo_name:minc-$short_commit")
+	    	def masterImg = docker.build("srvnonproddocker/$repo_name:minc-$short_commit")
 	    	echo "tell me the id"
 	    	print masterImg.id
 	    	//tag with prodlike
