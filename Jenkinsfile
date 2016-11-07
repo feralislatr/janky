@@ -105,7 +105,7 @@ node('master') {
 					        	print "Error I am in the $env_app environment"
 					           	sh("curl -X POST -H 'Content-Type: application/json' -d '{\"body\": \"CI/CD could not finish the deployment process because it has been **Aborted**.\"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
 					            //close pull request
-					            //sh("curl -S -X PATCH -H 'Content-Type: application/json' -d '{\"state\": \"closed\"}' https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/api/v3/repos/Pipeline/${repo_name}/pulls/${pull_id}")
+					            //sh("curl -s -S -X PATCH -H 'Content-Type: application/json' -d '{\"state\": \"closed\"}' https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/api/v3/repos/Pipeline/${repo_name}/pulls/${pull_id}  > /dev/null")
 					            throw err
 
 					       	}
@@ -122,7 +122,7 @@ node('master') {
 		     		print err
 		        	sh("curl -X POST -H 'Content-Type: application/json' -d '{\"body\": \"CI/CD could not finish the deployment process because of the following error: <br > ${err} \"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
 		      	//close pull request
-	            sh("curl -S -X PATCH -H 'Content-Type: application/json' -d '{\"state\": \"closed\"}' https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/api/v3/repos/Pipeline/${repo_name}/pulls/${pull_id}")	          	
+	            sh("curl -s -S -X PATCH -H 'Content-Type: application/json' -d '{\"state\": \"closed\"}' https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/api/v3/repos/Pipeline/${repo_name}/pulls/${pull_id} > /dev/null")	          	
 		      	}
 		      	
 			}
