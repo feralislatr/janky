@@ -1,6 +1,4 @@
 #!groovy
-//nodeJS Jenkinsfile
-//calls docker-build-pipeline2
 node('master') { 
     currentBuild.result = "SUCCESS" 
     //Get credentials 
@@ -101,7 +99,7 @@ node('master') {
 									sh "git push origin $target_branch"
 
 									//This needs to become dynamic
-									sh("curl -XPOST -d '{\"state\": \"success\", \"context\": \"continuous-integration/jenkins/branch\"}' https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/api/v3/repos/Pipeline/test-sample-1/statuses/${git_sha}")
+									sh("curl -XPOST -d '{\"state\": \"success\", \"context\": \"continuous-integration/jenkins/branch\"}' https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/api/v3/repos/Pipeline/${repo_name}/statuses/${git_sha}")
 
 
 						} catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException err) {
