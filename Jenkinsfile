@@ -109,10 +109,11 @@ node('master') {
 					           	sh("curl -XPOST -H 'Content-Type: application/json' -d '{\"body\": \"CI/CD could not finish the deployment process because it has been **Aborted**.\"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
 					            //close pull request
 
-					            //sh ("curl PATCH https://csp-github.micropaas.io/api/v3/repos/Pipeline/nodejs-food-service/pulls/${pull_id}?access_token=${PASSWORD}")
 					            echo "does work?"
-					            sh("curl -s -X PATCH -H 'Content-Type: application/json' -d {'state': 'closed'} https://csp-github.micropaas.io/api/v3/repos/Pipeline/${repo_name}/pulls/${pull_id}?access_token=144ce55e20843484ef8a84f774df5088ca72dd83")
-					          
+					            echo "repo $repo_name and id $pull_id"
+
+					            sh("curl -X PATCH -H 'Content-Type: application/json' -d {'state': 'closed'} https://csp-github.micropaas.io/api/v3/repos/Pipeline/${repo_name}/pulls/${pull_id}?access_token=144ce55e20843484ef8a84f774df5088ca72dd83")
+					          	
 					            throw err
 
 					       	}
@@ -129,7 +130,7 @@ node('master') {
 		     		print err
 		        	sh("curl -XPOST -H 'Content-Type: application/json' -d '{\"body\": \"CI/CD could not finish the deployment process because of the following error: <br > ${err} \"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
 		      	//close pull request
-		      	sh("curl -s -X PATCH -H 'access_token: $PASSWORD' -H 'Content-Type: application/json' -d '{\"state\": \"closed\"}' https://csp-github.micropaas.io/api/v3/repos/Pipeline/${repo_name}/pulls/${pull_id}")
+		      	//sh("curl -X PATCH -H 'access_token: $PASSWORD' -H 'Content-Type: application/json' -d '{\"state\": \"closed\"}' https://csp-github.micropaas.io/api/v3/repos/Pipeline/${repo_name}/pulls/${pull_id}")
 		      	}
 		      	
 			}
