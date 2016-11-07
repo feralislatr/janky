@@ -107,7 +107,7 @@ node('master') {
 					           	sh("curl -XPOST -H 'Content-Type: application/json' -d '{\"body\": \"CI/CD could not finish the deployment process because it has been **Aborted**.\"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
 					            //close pull request
 
-					            //sh ("curl PATCH https://csp-github.micropaas.io/api/v3/repos/Pipeline/nodejs-food-service/pulls/9?access_token=${PASSWORD}")
+					            //sh ("curl PATCH https://csp-github.micropaas.io/api/v3/repos/Pipeline/nodejs-food-service/pulls/${pull_id}?access_token=${PASSWORD}")
 					            //patch(repo_name, pull_id)
 					            patch(repo_name, pull_id){
 					            	curl -s -X PATCH \
