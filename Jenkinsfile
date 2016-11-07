@@ -19,16 +19,7 @@ node('master') {
 			        	def repogex = ".+/(.+)/.+"
                   		repo_name = (env.JOB_NAME =~ repogex)[0][1] //def repo_name
 						echo "$repo_name"
-			        stage 'Propose Merge'
-			        //Merge Code
-			        	try {
-			        		sh "git branch -D temp"
-			        	} catch (err) {}
-			        	    sh "git checkout -b temp"
-			        	    sh "git checkout $target_branch"
-        				    sh "git merge --no-ff temp"
-			       
-			       
+			        
 			       	stage 'Get Variables'
 			       		def env_param = ""
 			       		String env_app = ""
@@ -49,6 +40,16 @@ node('master') {
 					        placeholder = env.BUILD_URL.replace('http', 'https')
 					        def jenkins_pr_url = placeholder.replace(':8080', '')
 					        print jenkins_pr_url
+
+
+					stage 'Propose Merge'
+			        	//Merge Code
+			        	try {
+			        		sh "git branch -D temp"
+			        	} catch (err) {}
+			        	    sh "git checkout -b temp"
+			        	    sh "git checkout $target_branch"
+        				    sh "git merge --no-ff temp"
 
 					        //Main pipeline
 					        try{
