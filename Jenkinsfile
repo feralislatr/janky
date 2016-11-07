@@ -11,6 +11,8 @@ node('master') {
 	        passwordVariable: 'PASSWORD'
 	        ]]) {
 	    	def github_pull_req = ""
+	    	def repo_name = ""
+	    	def pull_id = ""
 		    	try {
 		    		//Get current commit from github
 		    		checkout scm
@@ -18,7 +20,7 @@ node('master') {
 			       	stage 'Detemining a Target Branch'
 			        	def target_branch = env.CHANGE_TARGET
 			        	def repogex = ".+/(.+)/.+"
-                  		String repo_name = (env.JOB_NAME =~ repogex)[0][1]
+                  		 repo_name = (env.JOB_NAME =~ repogex)[0][1] //def repo_name
 						echo "$repo_name"
 			        stage 'Propose Merge'
 			        //Merge Code
@@ -46,7 +48,7 @@ node('master') {
 					        def i = placeholder.indexOf('/')
 					        github_pull_req = placeholder.substring(0, i) + "/api/v3/repos" + placeholder.substring(i, placeholder.length())
 					        print github_pull_req
-					        def pull_id = env.CHANGE_ID
+					        pull_id = env.CHANGE_ID //def pull_id
 					        placeholder = env.BUILD_URL.replace('http', 'https')
 					        def jenkins_pr_url = placeholder.replace(':8080', '')
 					        print jenkins_pr_url
@@ -108,7 +110,7 @@ node('master') {
 					            //close pull request
 
 					            //sh ("curl PATCH https://csp-github.micropaas.io/api/v3/repos/Pipeline/nodejs-food-service/pulls/${pull_id}?access_token=${PASSWORD}")
-					            //patch(repo_name, pull_id)
+					            
 					            sh("curl -s -X PATCH -H 'access_token: $PASSWORD' -H 'Content-Type: application/json' -d '{'state': 'closed'} https://csp-github.micropaas.io/api/v3/repos/Pipeline/${repo_name}/pulls/${pull_id}")
 					          
 					            throw err
