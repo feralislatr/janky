@@ -10,6 +10,7 @@ node('master') {
 	        usernameVariable: 'USERNAME', 
 	        passwordVariable: 'PASSWORD'
 	        ]]) {
+	    	def github_pull_req = ""
 		    	try {
 		    		//Get current commit from github
 		    		checkout scm
@@ -30,10 +31,11 @@ node('master') {
 			       
 			       
 			       	stage 'Get Variables'
-			       		sh "env | sort"
 			       		def env_param = ""
 			       		String env_app = ""
+			       		sh "env | sort"
 			       		if (target_branch!=null){
+			       			//Get variables for pull request build
 				        	def lambda_url = 'https://8lmfqf29u1.execute-api.us-east-1.amazonaws.com/latest/deploy'
 					        def placeholder = env.CHANGE_URL.replace('/pull/', '/issues/') + "/comments"
 					        def git_sha = sh (
@@ -42,11 +44,13 @@ node('master') {
 					        ).trim()
 					        placeholder = placeholder.replace("https://", "")
 					        def i = placeholder.indexOf('/')
-					        def github_pull_req = placeholder.substring(0, i) + "/api/v3/repos" + placeholder.substring(i, placeholder.length())
+					        github_pull_req = placeholder.substring(0, i) + "/api/v3/repos" + placeholder.substring(i, placeholder.length())
 					        print github_pull_req
+					        def pull_id = env.CHANGE_ID
 					        placeholder = env.BUILD_URL.replace('http', 'https')
 					        def jenkins_pr_url = placeholder.replace(':8080', '')
 					        print jenkins_pr_url
+
 					        //Main pipeline
 					        try{
 					        	//If pull request is to development, only deploy to comp envrionment
@@ -58,16 +62,6 @@ node('master') {
 							             	 push(env_app, git_sha, repo_name)
 						        stage "Deploy To Component Environment"
 							            	 deploy(env_app, github_pull_req, repo_name)
-
-							    //Push merged code after deployment
-								// stage 'Merge Pull Request'
-								// 	echo "$repo_name"
-								// 	sh "git remote set-url origin https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/Pipeline/${repo_name}.git"
-								//     sh "git pull"
-								// 	sh "git push origin $target_branch"
-
-								// 	//This needs to become dynamic
-								// 	sh("curl -XPOST -d '{\"state\": \"success\", \"context\": \"continuous-integration/jenkins/branch\"}' https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/api/v3/repos/Pipeline/test-sample-1/statuses/${git_sha}")
 									
 							//If pull request is to the master branch, deploy to minc, prodlike, or prod
 							} else if (target_branch == 'master'){
@@ -94,18 +88,9 @@ node('master') {
 						               		push(env_app, git_sha, repo_name)
 						               	stage "Deploy to Production"
 						                 	deploy(env_app, github_pull_req, repo_name)
-
-						         		//Push merged code after deployment
-										// stage 'Merge Pull Request'
-										// 	echo "$repo_name"
-										//     sh "git remote set-url origin https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/Pipeline/${repo_name}.git"
-										//     sh "git pull"
-										// 	sh "git push origin $target_branch"
-
-										// 	//This needs to become dynamic
-										// 	sh("curl -XPOST -d '{\"state\": \"success\", \"context\": \"continuous-integration/jenkins/branch\"}' https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/api/v3/repos/Pipeline/test-sample-1/statuses/${git_sha}")
 							        	   		
 					           	}
+
 					           	//See if this merges for development, master, AND feature branches
 					           	stage 'Merge Pull Request'
 									echo "$repo_name"
@@ -118,9 +103,25 @@ node('master') {
 
 
 						} catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException err) {
-					        	print "Error I am in the "
+					        	print "Error I am in the $env_app environment"
 					           	sh("curl -XPOST -H 'Content-Type: application/json' -d '{\"body\": \"CI/CD could not finish the deployment process because it has been **Aborted**.\"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
-					            	throw err
+					            //close pull request
+
+					            //sh ("curl PATCH https://csp-github.micropaas.io/api/v3/repos/Pipeline/nodejs-food-service/pulls/9?access_token=${PASSWORD}")
+					            //patch(repo_name, pull_id)
+					            patch(repo_name, pull_id){
+					            	curl -s -X PATCH \
+									  -H "access_token: $PASSWORD" \
+									  -H "Content-Type: application/json" \
+									  -d '
+									{
+										"state": "closed"
+									}'\
+									  https://csp-github.micropaas.io/api/v3/repos/Pipeline/${repo_name}/pulls/${pull_id}
+					            }
+
+					            throw err
+
 					       	}
 			         	} else { //Run tests on push to a feature branch
 			         		stage 'Test a Push'
@@ -134,6 +135,7 @@ node('master') {
 		        	print "An error happened:"
 		     		print err
 		        	sh("curl -XPOST -H 'Content-Type: application/json' -d '{\"body\": \"CI/CD could not finish the deployment process because of the following error: <br > ${err} \"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
+		      	//close pull request
 		      	}
 		      	
 			}
@@ -160,37 +162,28 @@ def deploy(String env_app, String github_pull_req, String repo_name) {
 }
 
 //Run docker tag and build scripts with respect to deploy environments
-//changed env_param to env_app
 def push(String env_app, String git_sha, String repo_name) {
     placeholder = env.JOB_NAME.split('/')
     def dockerhub = "dockerhub-app-01.east1e.nonprod.dmz"
     def short_commit="$git_sha".take(6)
     repo_name = repo_name.toLowerCase();
     echo "$repo_name"
-    //def masterImg
-
-    //repo_name cannot have underscores or uppercase letters
-    //echo $repo_name | tr '[:upper:]' '[:lower:]' 
 
     switch (env_app){
     	case "comp" :
     		echo"env is: comp"
     		//build and push image
     		def devImg = docker.build("srvnonproddocker/$repo_name:$env_app-$short_commit")
-			//devImg.inside{sh 'npm install'}
     		devImg.push("$comp-$short_commit")
     		break
 
     	case "minc" :
+    		echo "env is: minc"
     		//build and push image
-    		echo"env is: minc"
-    		//sh ("/bin/bash /var/lib/jenkins/scripts/docker-build-pipeline2.sh $repo_name $env_app $git_sha")
-    		//$dockerhub/srvnonproddocker/
     		def masterImg = docker.build("srvnonproddocker/$repo_name:base")
     		masterImg.tag("minc-$short_commit")
 			echo "tell me the id"
     		print masterImg.id
-			//masterImg.inside{sh 'npm install'}
 			masterImg.push("minc-$short_commit")
 			echo "minc image just pushed"
 			print masterImg.id
@@ -199,13 +192,11 @@ def push(String env_app, String git_sha, String repo_name) {
     	case "prodlike" :
     		echo "env is: prodlike"
 	    	//use previously pushed image
-	    	//def masterImg = docker.build("srvnonproddocker/$repo_name:prodlike-$short_commit")
 	    	def masterImg = docker.image("srvnonproddocker/$repo_name:base")
     		//tag with prodlike
 	    	masterImg.tag("prodlike-$short_commit")
 	    	echo "tell me the id"
 	    	print masterImg.id
-			//masterImg.inside{sh 'npm install'}
 			//push re-tagged image to dockerhub
 			masterImg.push("prodlike-$short_commit")
 			echo "prodlike image just pushed"
@@ -214,13 +205,11 @@ def push(String env_app, String git_sha, String repo_name) {
     	case "prod" :
     		echo "env is: prod"
 	    	//use previously pushed image
-	    	//sh "docker pull $dockerhub/srvnonproddocker/prodlike-$short_commit"
 	 		def masterImg = docker.image("srvnonproddocker/$repo_name:base")
 	    	//tag with prod
 	    	masterImg.tag("prod-$short_commit")
 	   	   	echo "tell me the id"
 	   	   	print masterImg.id
-			//masterImg.inside{sh 'npm install'}
 			//push re-tagged image to dockerhub
 			masterImg.push("prod-$short_commit")
     		break	
