@@ -112,7 +112,7 @@ node('master') {
 					            echo "does work?"
 					            echo "repo $repo_name and id $pull_id"
 
-					            sh("curl -X PATCH -H 'Content-Type: application/json' -d {'state': 'closed'} https://csp-github.micropaas.io/api/v3/repos/Pipeline/${repo_name}/pulls/${pull_id}?access_token=144ce55e20843484ef8a84f774df5088ca72dd83")
+					            sh("curl -X PATCH -H 'Content-Type: application/json' -d '{\"state\": \"closed\"}' https://csp-github.micropaas.io/api/v3/repos/Pipeline/${repo_name}/pulls/${pull_id}?access_token=144ce55e20843484ef8a84f774df5088ca72dd83")
 					          	
 					            throw err
 
