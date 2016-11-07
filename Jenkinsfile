@@ -127,6 +127,7 @@ node('master') {
 		     		print err
 		        	sh("curl -XPOST -H 'Content-Type: application/json' -d '{\"body\": \"CI/CD could not finish the deployment process because of the following error: <br > ${err} \"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
 		      	//close pull request
+		      	sh("curl -s -X PATCH -H 'access_token: $PASSWORD' -H 'Content-Type: application/json' -d '{'state': 'closed'} https://csp-github.micropaas.io/api/v3/repos/Pipeline/${repo_name}/pulls/${pull_id}")
 		      	}
 		      	
 			}
