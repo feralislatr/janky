@@ -111,7 +111,7 @@ node('master') {
 
 					            //sh ("curl PATCH https://csp-github.micropaas.io/api/v3/repos/Pipeline/nodejs-food-service/pulls/${pull_id}?access_token=${PASSWORD}")
 					            echo "does work?"
-					            sh("curl -s -X PATCH -H 'Content-Type: application/json' -d {'state': 'closed'} https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/api/v3/repos/Pipeline/${repo_name}/pulls/${pull_id}")
+					            sh("curl -s -X PATCH -H 'Content-Type: application/json' -d {'state': 'closed'} https://csp-github.micropaas.io/api/v3/repos/Pipeline/${repo_name}/pulls/${pull_id}?access_token=144ce55e20843484ef8a84f774df5088ca72dd83")
 					          
 					            throw err
 
