@@ -107,13 +107,10 @@ node('master') {
 						} catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException err) {
 					        	print "Error I am in the $env_app environment"
 					           	sh("curl -XPOST -H 'Content-Type: application/json' -d '{\"body\": \"CI/CD could not finish the deployment process because it has been **Aborted**.\"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
+					            
 					            //close pull request
-
-					            echo "does work?"
-					            echo "repo $repo_name and id $pull_id"
-
-					            sh("curl -X PATCH -H 'Content-Type: application/json' -d '{\"state\": \"closed\"}' https://csp-github.micropaas.io/api/v3/repos/Pipeline/${repo_name}/pulls/${pull_id}?access_token=144ce55e20843484ef8a84f774df5088ca72dd83")
-					          	
+					            sh("curl -X PATCH -H 'Content-Type: application/json' -d '{\"state\": \"closed\"}' https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/api/v3/repos/Pipeline/${repo_name}/pulls/${pull_id}")
+					          	//?access_token=144ce55e20843484ef8a84f774df5088ca72dd83
 					            throw err
 
 					       	}
