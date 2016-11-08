@@ -108,6 +108,7 @@ node('master') {
 					           	sh("curl -X POST -H 'Content-Type: application/json' -d '{\"body\": \"CI/CD could not finish the deployment process because it has been **Aborted**.\"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
 					            //close pull request
 					            sh("curl -s -S -X PATCH -H 'Content-Type: application/json' -d '{\"state\": \"closed\"}' https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/api/v3/repos/Pipeline/${repo_name}/pulls/${pull_id}  > /dev/null")
+					            currentBuild.result = "FAILURE"
 					            throw err
 
 					       	}
@@ -123,6 +124,7 @@ node('master') {
 		        	print "An error happened:"
 		     		print err
 		        	sh("curl -X POST -H 'Content-Type: application/json' -d '{\"body\": \"CI/CD could not finish the deployment process because of the following error: <br > ${err} \"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
+		        	currentBuild.result = "FAILURE"
 		      	//close pull request
 	            //sh("curl -s -S -X PATCH -H 'Content-Type: application/json' -d '{\"state\": \"closed\"}' https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/api/v3/repos/Pipeline/${repo_name}/pulls/${pull_id} > /dev/null")	          	
 		      	}
