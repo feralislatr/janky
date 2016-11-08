@@ -99,8 +99,8 @@ node('master') {
 									sh "git pull"
 									sh "git push origin $target_branch"
 
-								//This needs to become dynamic
-								sh("curl -X POST -d '{\"state\": \"success\", \"context\": \"continuous-integration/jenkins/branch\"}' https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/api/v3/repos/Pipeline/${repo_name}/statuses/${git_sha}")
+									//This needs to become dynamic
+									sh("curl -X POST -d '{\"state\": \"success\", \"context\": \"continuous-integration/jenkins/branch\"}' https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/api/v3/repos/Pipeline/${repo_name}/statuses/${git_sha}")
 
 
 						} catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException err) {
@@ -122,11 +122,12 @@ node('master') {
 			         	}
 		      	} catch (err) {
 		        	print "An error happened:"
-		     		print err
+		     		//print err
 		        	sh("curl -X POST -H 'Content-Type: application/json' -d '{\"body\": \"CI/CD could not finish the deployment process because of the following error: <br > ${err} \"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
 		        	currentBuild.result = "FAILURE"
-		      	//close pull request
-	            //sh("curl -s -S -X PATCH -H 'Content-Type: application/json' -d '{\"state\": \"closed\"}' https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/api/v3/repos/Pipeline/${repo_name}/pulls/${pull_id} > /dev/null")	          	
+		      		//close pull request
+	           	 	//sh("curl -s -S -X PATCH -H 'Content-Type: application/json' -d '{\"state\": \"closed\"}' https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/api/v3/repos/Pipeline/${repo_name}/pulls/${pull_id} > /dev/null")	          	
+		      		throw err
 		      	}
 		      	
 			}
