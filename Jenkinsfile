@@ -94,10 +94,10 @@ node('master') {
 
 					           	//See if this merges for development, master, AND feature branches
 					           	stage 'Merge Pull Request'
-								echo "$repo_name"
-								sh "git remote set-url origin https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/Pipeline/${repo_name}.git"
-								sh "git pull"
-								sh "git push origin $target_branch"
+									echo "$repo_name"
+									sh "git remote set-url origin https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/Pipeline/${repo_name}.git"
+									sh "git pull"
+									sh "git push origin $target_branch"
 
 								//This needs to become dynamic
 								sh("curl -X POST -d '{\"state\": \"success\", \"context\": \"continuous-integration/jenkins/branch\"}' https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/api/v3/repos/Pipeline/${repo_name}/statuses/${git_sha}")
@@ -116,7 +116,7 @@ node('master') {
 			           		print "Run tests"
 			         		stage 'Build the code'
 			         		stage 'Run the Unit tests'
-			         		//unit tests run by Dockerfile
+			         			sh "npm install"
 	
 			         	}
 		      	} catch (err) {
