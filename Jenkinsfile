@@ -1,4 +1,5 @@
 #!groovy
+//nodeJS Jenkinsfile
 node('master') { 
     currentBuild.result = "SUCCESS" 
     //Get credentials 
@@ -42,14 +43,14 @@ node('master') {
 					        print jenkins_pr_url
 
 
-					stage 'Propose Merge'
-			        	//Merge Code
-			        	try {
-			        		sh "git branch -D temp"
-			        	} catch (err) {}
-			        	    sh "git checkout -b temp"
-			        	    sh "git checkout $target_branch"
-        				    sh "git merge --no-ff temp"
+							stage 'Propose Merge'
+					        //Merge Code
+					        	try {
+					        		sh "git branch -D temp"
+					        	} catch (err) {}
+					        	    sh "git checkout -b temp"
+					        	    sh "git checkout $target_branch"
+		        				    sh "git merge --no-ff temp"
 
 					        //Main pipeline
 					        try{
@@ -106,7 +107,7 @@ node('master') {
 					        	print "Error I am in the $env_app environment"
 					           	sh("curl -X POST -H 'Content-Type: application/json' -d '{\"body\": \"CI/CD could not finish the deployment process because it has been **Aborted**.\"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
 					            //close pull request
-					            //sh("curl -s -S -X PATCH -H 'Content-Type: application/json' -d '{\"state\": \"closed\"}' https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/api/v3/repos/Pipeline/${repo_name}/pulls/${pull_id}  > /dev/null")
+					            sh("curl -s -S -X PATCH -H 'Content-Type: application/json' -d '{\"state\": \"closed\"}' https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/api/v3/repos/Pipeline/${repo_name}/pulls/${pull_id}  > /dev/null")
 					            throw err
 
 					       	}
@@ -123,7 +124,7 @@ node('master') {
 		     		print err
 		        	sh("curl -X POST -H 'Content-Type: application/json' -d '{\"body\": \"CI/CD could not finish the deployment process because of the following error: <br > ${err} \"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
 		      	//close pull request
-	            sh("curl -s -S -X PATCH -H 'Content-Type: application/json' -d '{\"state\": \"closed\"}' https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/api/v3/repos/Pipeline/${repo_name}/pulls/${pull_id} > /dev/null")	          	
+	            //sh("curl -s -S -X PATCH -H 'Content-Type: application/json' -d '{\"state\": \"closed\"}' https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/api/v3/repos/Pipeline/${repo_name}/pulls/${pull_id} > /dev/null")	          	
 		      	}
 		      	
 			}
@@ -170,7 +171,6 @@ def push(String env_app, String git_sha, String repo_name) {
     		//build and push image
     		def masterImg = docker.build("srvnonproddocker/$repo_name:base")
     		masterImg.tag("minc-$short_commit")
-			echo "tell me the id"
     		print masterImg.id
 			masterImg.push("minc-$short_commit")
 			echo "minc image just pushed"
@@ -183,7 +183,6 @@ def push(String env_app, String git_sha, String repo_name) {
 	    	def masterImg = docker.image("srvnonproddocker/$repo_name:base")
     		//tag with prodlike
 	    	masterImg.tag("prodlike-$short_commit")
-	    	echo "tell me the id"
 	    	print masterImg.id
 			//push re-tagged image to dockerhub
 			masterImg.push("prodlike-$short_commit")
@@ -196,7 +195,6 @@ def push(String env_app, String git_sha, String repo_name) {
 	 		def masterImg = docker.image("srvnonproddocker/$repo_name:base")
 	    	//tag with prod
 	    	masterImg.tag("prod-$short_commit")
-	   	   	echo "tell me the id"
 	   	   	print masterImg.id
 			//push re-tagged image to dockerhub
 			masterImg.push("prod-$short_commit")
