@@ -1,42 +1,7 @@
 #!groovy
 //nodeJS Jenkinsfile
 
-import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY;
-import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
-import static java.util.logging.Level.FINE;
-import static java.net.HttpURLConnection.HTTP_UNAUTHORIZED;
-import static org.kohsuke.github.Previews.DRAX;
-
-import java.io.ByteArrayInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TimeZone;
-
-import org.apache.commons.codec.Charsets;
-import org.apache.commons.codec.binary.Base64;
-
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.introspect.VisibilityChecker.Std;
-import com.infradna.tool.bridge_method_injector.WithBridgeMethods;
-
-import java.util.logging.Logger;
+import org.kohsuke.github
 
 
 node('master') { 
