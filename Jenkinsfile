@@ -47,7 +47,7 @@ node('master') {
 					        def repo = GHRepository
 							repo = github.createRepository("new-repository","this is my new repository", "https://csp-github.micropaas.io/Pipeline/nodejs-ui-service/",true)
 							repo.addCollaborators(github.getUser("brianaslaterADM")
-							repo.delete
+							//repo.delete
 
    							stage 'Propose Merge'
    							try {
