@@ -3,7 +3,7 @@
 
 
 package org.kohsuke.github
-
+import org.kohsuke.github.GitHub
 
 node('master') { 
     currentBuild.result = "SUCCESS" 
