@@ -1,7 +1,8 @@
 #!groovy
 //nodeJS Jenkinsfile
 
-import org.kohsuke.github
+
+package org.kohsuke.github
 
 
 node('master') { 
