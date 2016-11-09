@@ -42,12 +42,12 @@ node('master') {
 					        def jenkins_pr_url = placeholder.replace(':8080', '')
 					        print jenkins_pr_url
 
-					        //git thing
-					        GitHub github = GitHub.connect();
-					        def repo = GHRepository
-							repo = github.createRepository("new-repository","this is my new repository", "https://csp-github.micropaas.io/Pipeline/nodejs-ui-service/",true)
-							repo.addCollaborators(github.getUser("brianaslaterADM")
-							//repo.delete
+					  //       //git thing
+					  //       GitHub github = GitHub.connect();
+					  //       def repo = GHRepository
+							// repo = github.createRepository("new-repository","this is my new repository", "https://csp-github.micropaas.io/Pipeline/nodejs-ui-service/",true)
+							// repo.addCollaborators(github.getUser("brianaslaterADM")
+							// //repo.delete
 
    							stage 'Propose Merge'
    							try {
