@@ -50,7 +50,7 @@ node('master') {
 
    							stage 'Propose Merge'
    							try {
-					        		git.branch -D temp
+					        		sh "git branch -D temp"
 					        	} catch (err) {}
 					        	    sh "git checkout -b temp"
 					        	    sh "git checkout $target_branch"
