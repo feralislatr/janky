@@ -42,15 +42,28 @@ node('master') {
 					        def jenkins_pr_url = placeholder.replace(':8080', '')
 					        print jenkins_pr_url
 
+					        //git thangs
+					        GitClient git = Git.with(listener, environment)
+   							.in(repository)
+   							.using(gitExe)
+   							.getClient();
 
-							stage 'Propose Merge'
-					        //Merge Code
-					        	try {
-					        		sh "git branch -D temp"
+   							stage 'Propose Merge'
+   							try {
+					        		git.branch -D temp
 					        	} catch (err) {}
 					        	    sh "git checkout -b temp"
 					        	    sh "git checkout $target_branch"
 		        				    sh "git merge --no-ff temp"
+
+							stage 'Propose Merge'
+					        // //Merge Code
+					        // 	try {
+					        // 		sh "git branch -D temp"
+					        // 	} catch (err) {}
+					        // 	    sh "git checkout -b temp"
+					        // 	    sh "git checkout $target_branch"
+		        			// 	    sh "git merge --no-ff temp"
 
 					        //Main pipeline
 					        try{
