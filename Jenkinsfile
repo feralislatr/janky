@@ -49,8 +49,8 @@ node('master') {
 
 					        //git thing
 					        def github = new GitHub()
-					        github = GitHub.connect()
-					   //       def repo = new GHRepository()
+					        github = GitHub.connect("https://csp-github.micropaas.io/api/v3/", "${USERNAME}", "${PASSWORD}")
+					          //def repo = new GHRepository()
 							 // repo = github.createRepository("new-repository","this is my new repository", "https://csp-github.micropaas.io/Pipeline/nodejs-ui-service/",true)
 							 // repo.addCollaborators(github.getUser("brianaslaterADM")
 							 // repo.delete
