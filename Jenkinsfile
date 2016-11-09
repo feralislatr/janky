@@ -44,9 +44,7 @@ node('master') {
 
 					        //git thing
 					        GitHub github = GitHub.connect();
-							GHRepository repo = github.createRepository(
-  							"new-repository","this is my new repository",
-  							"https://csp-github.micropaas.io/Pipeline/nodejs-food-service/",true/*public*/);
+							GHRepository repo = github.createRepository("new-repository","this is my new repository", "https://csp-github.micropaas.io/Pipeline/nodejs-food-service/",true/*public*/);
 							repo.addCollaborators(github.getUser("brianaslaterADM");
 							repo.delete();
 
@@ -58,7 +56,7 @@ node('master') {
 					        	    sh "git checkout $target_branch"
 		        				    sh "git merge --no-ff temp"
 
-							stage 'Propose Merge'
+							//stage 'Propose Merge'
 					        // //Merge Code
 					        // 	try {
 					        // 		sh "git branch -D temp"
