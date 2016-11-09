@@ -44,9 +44,9 @@ node('master') {
 
 					        //git thing
 					        GitHub github = GitHub.connect();
-							GHRepository repo = github.createRepository("new-repository","this is my new repository", "https://csp-github.micropaas.io/Pipeline/nodejs-food-service/",true);
-							repo.addCollaborators(github.getUser("brianaslaterADM");
-							repo.delete();
+							GHRepository repo = github.createRepository("new-repository","this is my new repository", "https://csp-github.micropaas.io/Pipeline/nodejs-food-service/",true)
+							repo.addCollaborators(github.getUser("brianaslaterADM")
+							repo.delete()
 
    							stage 'Propose Merge'
    							try {
