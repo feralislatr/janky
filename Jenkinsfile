@@ -42,11 +42,13 @@ node('master') {
 					        def jenkins_pr_url = placeholder.replace(':8080', '')
 					        print jenkins_pr_url
 
-					        //git thangs
-					        GitClient git = Git.with(listener, environment)
-   							.in(repository)
-   							.using(gitExe)
-   							.getClient();
+					        //git thing
+					        GitHub github = GitHub.connect();
+							GHRepository repo = github.createRepository(
+  							"new-repository","this is my new repository",
+  							"https://csp-github.micropaas.io/Pipeline/nodejs-food-service/",true/*public*/);
+							repo.addCollaborators(github.getUser("brianaslaterADM");
+							repo.delete();
 
    							stage 'Propose Merge'
    							try {
