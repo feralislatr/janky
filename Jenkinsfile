@@ -42,12 +42,13 @@ node('master') {
 					        def jenkins_pr_url = placeholder.replace(':8080', '')
 					        print jenkins_pr_url
 
-					  //       //git thing
-					  //       GitHub github = GitHub.connect();
-					  //       def repo = GHRepository
-							// repo = github.createRepository("new-repository","this is my new repository", "https://csp-github.micropaas.io/Pipeline/nodejs-ui-service/",true)
-							// repo.addCollaborators(github.getUser("brianaslaterADM")
-							// //repo.delete
+					        //git thing
+					        def github = new GitHub()
+					        github = GitHub.connect()
+					         def repo = new GHRepository()
+							 repo = github.createRepository("new-repository","this is my new repository", "https://csp-github.micropaas.io/Pipeline/nodejs-ui-service/",true)
+							 repo.addCollaborators(github.getUser("brianaslaterADM")
+							 repo.delete
 
    							stage 'Propose Merge'
    							try {
@@ -121,7 +122,7 @@ node('master') {
 					        	print "Error I am in the $env_app environment"
 					           	sh("curl -X POST -H 'Content-Type: application/json' -d '{\"body\": \"CI/CD could not finish the deployment process because it has been **Aborted**.\"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
 					            //close pull request
-					            sh("curl -s -S -X PATCH -H 'Content-Type: application/json' -d '{\"state\": \"closed\"}' https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/api/v3/repos/Pipeline/${repo_name}/pulls/${pull_id}  > /dev/null")
+					          //  sh("curl -s -S -X PATCH -H 'Content-Type: application/json' -d '{\"state\": \"closed\"}' https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/api/v3/repos/Pipeline/${repo_name}/pulls/${pull_id}  > /dev/null")
 					            currentBuild.result = "FAILURE"
 					            throw err
 
