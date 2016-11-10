@@ -11,6 +11,7 @@ node() {
 
 if (target_branch == null) { //Run tests on push to a feature branch
   node() {
+    sh ('sudo usermod -aG docker jenkins && groups')
     //Get current commit from github
     checkout scm
 
