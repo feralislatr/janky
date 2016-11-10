@@ -33,37 +33,38 @@ if (target_branch == null) { //Run tests on push to a feature branch
   def github_url, org_name, repo_name, branch_name, pull_id
 
   try {
-    stage('Prepare the environment') {
-      //Get current commit from github
-      checkout scm
+    node(){
+      stage('Prepare the environment') {
+        //Get current commit from github
+        checkout scm
 
-      withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'nonprod-github-cred', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
-        // get authentication for the github api
-        def auth_string = "https://" + USERNAME + ":" + PASSWORD + "@"
+        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'nonprod-github-cred', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+          // get authentication for the github api
+          def auth_string = "https://" + USERNAME + ":" + PASSWORD + "@"
 
-        // get the org, repo, and branch from the job name
-        def tokens = env.JOB_NAME.tokenize('/')
-        org_name = tokens[tokens.size()-3]
-        repo_name = tokens[tokens.size()-2]
-        branch_name = tokens[tokens.size()-1]
+          // get the org, repo, and branch from the job name
+          def tokens = env.JOB_NAME.tokenize('/')
+          org_name = tokens[tokens.size()-3]
+          repo_name = tokens[tokens.size()-2]
+          branch_name = tokens[tokens.size()-1]
 
-        // Take off the https, then remove the path to just leave the bare domain
-        github_url = env.CHANGE_URL.replace("https://", "").tokenize('/')[0]
-        // add the username and password and the endpoint for the this specific repository
-        github_url = auth_string + github_url + "/api/v3/repos/" + org_name + "/" + repo_name + "/"
+          // Take off the https, then remove the path to just leave the bare domain
+          github_url = env.CHANGE_URL.replace("https://", "").tokenize('/')[0]
+          // add the username and password and the endpoint for the this specific repository
+          github_url = auth_string + github_url + "/api/v3/repos/" + org_name + "/" + repo_name + "/"
 
-        // get the pull request/issue number
-        pull_id = env.CHANGE_ID
+          // get the pull request/issue number
+          pull_id = env.CHANGE_ID
 
-        // create the github api endpoint for posting a comment on this pull request
-        github_pull_req = github_url + "/issues/" + change_id + "/comments"
-        // create github api endpoint for changing the status of a pull request
-        close_pr_url = github_url + "/pulls/" + pull_id
+          // create the github api endpoint for posting a comment on this pull request
+          github_pull_req = github_url + "/issues/" + change_id + "/comments"
+          // create github api endpoint for changing the status of a pull request
+          close_pr_url = github_url + "/pulls/" + pull_id
+        }
+
+        stash includes: '*', name: 'workspace'
       }
-
-      stash includes: '*', name: 'workspace'
     }
-
     def git_sha = sh (
       script: 'git rev-parse HEAD',
       returnStdout: true
