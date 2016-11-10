@@ -50,7 +50,7 @@ if (target_branch == null) { //Run tests on push to a feature branch
   
         //echo "Test Failure"
         //currentBuild.result = 'FAILURE'
-       }
+       //}
       }
 
     }
