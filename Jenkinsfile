@@ -29,12 +29,12 @@ if (target_branch == null) { //Run tests on push to a feature branch
 } else {
   // URLS to hit the github API
   def github_pull_req, close_pr_url
-  
+
   def github_url, org_name, repo_name, branch_name, pull_id
 
   try {
-    node(){
-      stage('Prepare the environment') {
+    stage('Prepare the environment') {
+      node() {
         //Get current commit from github
         checkout scm
 
@@ -57,14 +57,15 @@ if (target_branch == null) { //Run tests on push to a feature branch
           pull_id = env.CHANGE_ID
 
           // create the github api endpoint for posting a comment on this pull request
-          github_pull_req = github_url + "/issues/" + change_id + "/comments"
+          github_pull_req = github_url + "issues/" + change_id + "/comments"
           // create github api endpoint for changing the status of a pull request
-          close_pr_url = github_url + "/pulls/" + pull_id
+          close_pr_url = github_url + "pulls/" + pull_id
         }
 
         stash includes: '*', name: 'workspace'
       }
     }
+
     def git_sha = sh (
       script: 'git rev-parse HEAD',
       returnStdout: true
@@ -192,7 +193,7 @@ def push(String env_id, String env_name, String git_sha, String repo_name) {
   stage("Build a Docker Image for $env_name") {
     node() {
       // Get all the files
-       unstash 'workspace'
+      unstash 'workspace'
       // get dockerhub credentials
       docker.withRegistry('http://dockerhub-app-01.east1e.nonprod.dmz/', 'nonprod-dockerhub') {
 
@@ -227,13 +228,15 @@ def push(String env_id, String env_name, String git_sha, String repo_name) {
 
 //Deploy application
 def deploy(String env_id, String env_name, String github_pull_req, String org_name, String repo_name) {
+
+  env_id = env_id.toLowerCase()
   def marketplace_url="http://marketplace-app-03.east1a.dev:3000/api/paas/docker/compose"
   def marketplace_prefix="app_env=${env_id}\\&repo_name=${org_name}/${repo_name}"
 
   stage("Deploy To $env_name") {
     node() {
       // Get all the files
-       unstash 'workspace'
+      unstash 'workspace'
 
       sh("echo This is p1 ${env_id}")
       sh("echo This is p2 ${repo_name}")
@@ -248,17 +251,17 @@ def deploy(String env_id, String env_name, String github_pull_req, String org_na
             script: "cat docker-config.json | python -c \"import sys, json; print json.load(sys.stdin)[\'app_id\']\"",
             returnStdout: true
       ).trim()
-      
+
       def APP_NAME = sh (
             script: "cat docker-config.json | python -c \"import sys, json; print json.load(sys.stdin)[\'app_name\']\"",
             returnStdout: true
       ).trim()
-      
+
       def paas_env = sh (
             script: "cat docker-config.json | python -c \"import sys, json; print json.load(sys.stdin)[\'platform_env_shortname\']\"",
             returnStdout: true
       ).trim()
-      
+
       def zone_id
       switch(paas_env) {
         case "prod" :
@@ -271,7 +274,7 @@ def deploy(String env_id, String env_name, String github_pull_req, String org_na
           zone_id="ZXC0DKN8MY5US"
           break
       }
-      
+
       sh("echo Setting Variables ========\
       && CERT_PATH=/var/lib/jenkins\
       && CA_CERT=$CERT_PATH/ca.pem\
