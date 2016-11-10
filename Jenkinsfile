@@ -44,13 +44,13 @@ if (target_branch == null) { //Run tests on push to a feature branch
        //  }else
        // echo "Tests Passed"
        
-       sh "node test"
-       // 2>&1 | tee log.txt"
-       //if (log.txt =~ .*"ERR!+".*){
-  
-        //echo "Test Failure"
-        //currentBuild.result = 'FAILURE'
-       //}
+       //sh "node test"
+       sh "npm install 2>&1 | tee log.txt"
+       def log=readFile('log.txt').trim()
+       if (log =~ .*"ERR!+".*){
+        echo "Test Failure"
+        currentBuild.result = 'FAILURE'
+       }
       }
 
     }
