@@ -1,262 +1,318 @@
 #!groovy
 //nodeJS Jenkinsfile
 
+// get the target branch for the pull request
+def target_branch = env.CHANGE_TARGET
 
-package org.kohsuke.github
-import org.kohsuke.github.GitHub
-
-node('master') { 
-    currentBuild.result = "SUCCESS" 
-    //Get credentials 
-	docker.withRegistry('http://dockerhub-app-01.east1e.nonprod.dmz/srvnonproddocker/', 'nonprod-dockerhub'){
-	    withCredentials([[$class : 'UsernamePasswordMultiBinding',
-	        credentialsId   : 'nonprod-github-cred',
-	        usernameVariable: 'USERNAME', 
-	        passwordVariable: 'PASSWORD'
-	        ]]) {
-	    	def github_pull_req = ""
-	    	def repo_name = ""
-	    	def pull_id = ""
-		    	try {
-		    		//Get current commit from github
-		    		checkout scm
-			       	stage 'Prepare the environment'
-			        	def target_branch = env.CHANGE_TARGET
-			        	def repogex = ".+/(.+)/.+"
-                  		repo_name = (env.JOB_NAME =~ repogex)[0][1] //def repo_name
-						echo "$repo_name"
-			        
-			       	stage 'Get Variables'
-			       		def env_param = ""
-			       		String env_app = ""
-			       		sh "env | sort"
-			       		if (target_branch!=null){
-			       			//Get variables for pull request build
-				        	def lambda_url = 'https://8lmfqf29u1.execute-api.us-east-1.amazonaws.com/latest/deploy'
-					        def placeholder = env.CHANGE_URL.replace('/pull/', '/issues/') + "/comments"
-					        def git_sha = sh (
-					        	script: 'git rev-parse HEAD',
-					            	returnStdout: true
-					        ).trim()
-					        placeholder = placeholder.replace("https://", "")
-					        def i = placeholder.indexOf('/')
-					        github_pull_req = placeholder.substring(0, i) + "/api/v3/repos" + placeholder.substring(i, placeholder.length())
-					        print github_pull_req
-					        pull_id = env.CHANGE_ID //def pull_id
-					        placeholder = env.BUILD_URL.replace('http', 'https')
-					        def jenkins_pr_url = placeholder.replace(':8080', '')
-					        print jenkins_pr_url
-
-					        //git thing
-					        def github = new GitHub()
-					        github = GitHub.connect("https://csp-github.micropaas.io/api/v3/", "${USERNAME}", "${PASSWORD}")
-					          //def repo = new GHRepository()
-							 // repo = github.createRepository("new-repository","this is my new repository", "https://csp-github.micropaas.io/Pipeline/nodejs-ui-service/",true)
-							 // repo.addCollaborators(github.getUser("brianaslaterADM")
-							 // repo.delete
-
-   							stage 'Propose Merge'
-   							try {
-					        		sh "git branch -D temp"
-					        	} catch (err) {}
-					        	    sh "git checkout -b temp"
-					        	    sh "git checkout $target_branch"
-		        				    sh "git merge --no-ff temp"
-
-							//stage 'Propose Merge'
-					        // //Merge Code
-					        // 	try {
-					        // 		sh "git branch -D temp"
-					        // 	} catch (err) {}
-					        // 	    sh "git checkout -b temp"
-					        // 	    sh "git checkout $target_branch"
-		        			// 	    sh "git merge --no-ff temp"
-
-					        //Main pipeline
-					        try{
-					        	//If pull request is to development, only deploy to comp envrionment
-					        	if (target_branch == 'development'){
-					        	env_app = "comp"
-								stage 'Comp Approval'
-						             		askApproval(env_app, lambda_url, jenkins_pr_url, github_pull_req)
-						        stage 'Build a Docker Image for Component environment'
-							             	 push(env_app, git_sha, repo_name)
-						        stage "Deploy To Component Environment"
-							            	 deploy(env_app, github_pull_req, repo_name)
-									
-							//If pull request is to the master branch, deploy to minc, prodlike, or prod
-							} else if (target_branch == 'master'){
-								 	env_app = "minc"
-						     		stage 'MINC Approval'
-						                	askApproval(env_app, lambda_url, jenkins_pr_url, github_pull_req)
-						             	stage 'Build a Docker Image for Minimum-Component environment'
-						               		push(env_app, git_sha, repo_name)
-						             	stage "Deploy to Minimum-Capacity"
-						               		deploy(env_app, github_pull_req, repo_name)
-						             	
-						             	stage 'PROD-LIKE Approval'
-						             		env_app = "prodlike"
-						             		askApproval(env_app, lambda_url, jenkins_pr_url, github_pull_req)
-						             	stage 'Tag a Docker Image for Production-Like'
-						               		push(env_app, git_sha, repo_name)
-						                stage "Deploy to Production-Like"
-						                	deploy(env_app, github_pull_req, repo_name)
-						             	
-						             	stage 'PROD Approval'
-						             		env_app = "prod"
-						             		askApproval(env_app, lambda_url, jenkins_pr_url, github_pull_req)
-						             	stage 'Tag a Docker Image for Production environment'
-						               		push(env_app, git_sha, repo_name)
-						               	stage "Deploy to Production"
-						                 	deploy(env_app, github_pull_req, repo_name)
-							        	   		
-					           	}
-
-					           	//See if this merges for development, master, AND feature branches
-					           	stage 'Merge Pull Request'
-									echo "$repo_name"
-									sh "git remote set-url origin https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/Pipeline/${repo_name}.git"
-									sh "git pull"
-									sh "git push origin $target_branch"
-
-									//This needs to become dynamic
-									sh("curl -X POST -d '{\"state\": \"success\", \"context\": \"continuous-integration/jenkins/branch\"}' https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/api/v3/repos/Pipeline/${repo_name}/statuses/${git_sha}")
-
-
-						} catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException err) {
-					        	print "Error I am in the $env_app environment"
-					           	sh("curl -X POST -H 'Content-Type: application/json' -d '{\"body\": \"CI/CD could not finish the deployment process because it has been **Aborted**.\"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
-					            //close pull request
-					          //  sh("curl -s -S -X PATCH -H 'Content-Type: application/json' -d '{\"state\": \"closed\"}' https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/api/v3/repos/Pipeline/${repo_name}/pulls/${pull_id}  > /dev/null")
-					            currentBuild.result = "FAILURE"
-					            throw err
-
-					       	}
-			         	} else { //Run tests on push to a feature branch
-			         		stage 'Test a Push'
-			           		print "Run tests"
-			         		stage 'Build the code'
-			         		stage 'Run the Unit tests'
-			         			sh "npm install"
-	
-			         	}
-		      	} catch (err) {
-		        	print "An error happened:"
-		     		//print err
-		        	sh("curl -X POST -H 'Content-Type: application/json' -d '{\"body\": \"CI/CD could not finish the deployment process because of the following error: <br > ${err} \"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
-		        	currentBuild.result = "FAILURE"
-		      		//close pull request
-	           	 	//sh("curl -s -S -X PATCH -H 'Content-Type: application/json' -d '{\"state\": \"closed\"}' https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/api/v3/repos/Pipeline/${repo_name}/pulls/${pull_id} > /dev/null")	          	
-		      		throw err
-		      	}
-		      	
-			}
-    	}
-	
+node() {
+  sh "env | sort"
 }
 
-//Run docker deploy script 
-def deploy(String env_app, String github_pull_req, String repo_name) {
-   def marketplace_url="http://marketplace-app-03.east1a.dev:3000/api/paas/docker/compose"
-   def marketplace_prefix="app_env=${env_app}\\&repo_name=${placeholder[0]}/${repo_name}"
-   print marketplace_prefix
-   sh ("/bin/bash /var/lib/jenkins/scripts/docker-compose-deploy-ucp-pipeline-reza.sh ${env_app} ${repo_name} ${marketplace_url} ${marketplace_prefix}")
-   
-   if(env_app == 'comp') {
-   	sh("curl -XPOST -H 'Content-Type: application/json' -d '{\"body\": \"Your service has been deployed to the **Component** Environment\"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
-   } else if(env_app == 'minc') {
-   	sh("curl -XPOST -H 'Content-Type: application/json' -d '{\"body\": \"Your service has been deployed to the **Minimum-Capacity** Environment\"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
-   } else if(env_app == 'prodlike') {
-   	sh("curl -XPOST -H 'Content-Type: application/json' -d '{\"body\": \"Your service has been deployed to the **Production Like** Environment\"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
-   } else if(env_app == 'prod') {
-   	sh("curl -XPOST -H 'Content-Type: application/json' -d '{\"body\": \"Your service has been deployed to the **Production** Environment\"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
-   }
+if (target_branch == null) { //Run tests on push to a feature branch
+  node() {
+    //Get current commit from github
+    checkout scm
+
+    stage('Test a Push') {
+      print "Run tests"
+    }
+
+    stage('Build the code') {
+      print "build code"
+    }
+
+    //unit tests run by Dockerfile
+    stage('Run the Unit tests') {
+      print "run unit tests"
+    }
+  }
+} else {
+  // URLS to hit the github API
+  def github_pull_req, close_pr_url
+  
+  def github_url, org_name, repo_name, branch_name, pull_id
+
+  try {
+    stage('Prepare the environment') {
+      //Get current commit from github
+      checkout scm
+
+      withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'nonprod-github-cred', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+        // get authentication for the github api
+        def auth_string = "https://" + USERNAME + ":" + PASSWORD + "@"
+
+        // get the org, repo, and branch from the job name
+        def tokens = env.JOB_NAME.tokenize('/')
+        org_name = tokens[tokens.size()-3]
+        repo_name = tokens[tokens.size()-2]
+        branch_name = tokens[tokens.size()-1]
+
+        // Take off the https, then remove the path to just leave the bare domain
+        github_url = env.CHANGE_URL.replace("https://", "").tokenize('/')[0]
+        // add the username and password and the endpoint for the this specific repository
+        github_url = auth_string + github_url + "/api/v3/repos/" + org_name + "/" + repo_name + "/"
+
+        // get the pull request/issue number
+        pull_id = env.CHANGE_ID
+
+        // create the github api endpoint for posting a comment on this pull request
+        github_pull_req = github_url + "/issues/" + change_id + "/comments"
+        // create github api endpoint for changing the status of a pull request
+        close_pr_url = github_url + "/pulls/" + pull_id
+      }
+
+      stash includes: '*', name: 'workspace'
+    }
+
+    def git_sha = sh (
+      script: 'git rev-parse HEAD',
+      returnStdout: true
+    ).trim()
+
+    def lambda_url = 'https://8lmfqf29u1.execute-api.us-east-1.amazonaws.com/latest/deploy'
+
+    def jenkins_pr_url = env.BUILD_URL
+
+    def env_name, env_id
+
+    //If pull request is to development, only deploy to comp envrionment
+    if (target_branch == 'development') {
+
+      // DEPLOY COMP ENVIRONMENT
+      env_id = "Comp"
+      env_name = "Component"
+
+      // Post comment on pull request and wait for approval to continue
+      askApproval(env_name, env_id, lambda_url, jenkins_pr_url, github_pull_req)
+      // Create and push docker image to dockerhub
+      push(env_id, env_name, git_sha, repo_name)
+      // Deploy the image to the environment
+      deploy(env_id, env_name, github_pull_req, org_name, repo_name)
+
+    //If pull request is to the master branch, deploy to minc, prodlike, or prod
+    } else if (target_branch == 'master') {
+
+      // DEPLOY MINIMUM-CAPACITY ENVIRONMENT
+      env_id = "Minc"
+      env_name = "Minimum-Capacity"
+
+      // Post comment on pull request and wait for approval to continue
+      askApproval(env_name, env_id, lambda_url, jenkins_pr_url, github_pull_req)
+      // Create and push docker image to dockerhub
+      push(env_id, env_name, git_sha, repo_name)
+      // Deploy the image to the environment
+      deploy(env_id, env_name, github_pull_req, org_name, repo_name)
+
+      // DEPLOY PROD-LIKE ENVIRONMENT
+      env_id = "ProdLike"
+      env_name = "Production-Like"
+
+      // Post comment on pull request and wait for approval to continue
+      askApproval(env_name, env_id, lambda_url, jenkins_pr_url, github_pull_req)
+      // Create and push docker image to dockerhub
+      push(env_id, env_name, git_sha, repo_name)
+      // Deploy the image to the environment
+      deploy(env_id, env_name, github_pull_req, org_name, repo_name)
+
+      // DEPLOY PROD ENVIRONMENT
+      env_id = "Prod"
+      env_name = "Production"
+
+      // Post comment on pull request and wait for approval to continue
+      askApproval(env_name, env_id, lambda_url, jenkins_pr_url, github_pull_req)
+      // Create and push docker image to dockerhub
+      push(env_id, env_name, git_sha, repo_name)
+      // Deploy the image to the environment
+      deploy(env_id, env_name, github_pull_req, org_name, repo_name)
+
+    }
+    stage('Merge Pull Request') {
+      node() {
+        //This needs to become dynamic
+        sh("curl -X PUT -d '{\"commit_message\": \"Pull Request merged by Jenkins\"}' ${close_pr_url}/merge")
+      }
+    }
+
+  } catch (err) {
+    currentBuild.result = 'FAILURE'
+    print "An error happened:"
+    print err
+    post("CI/CD could not finish the deployment process because of the following error: <br > ${err} ", github_pull_req)
+    //close pull request
+    //sh("curl -s -S -X PATCH -H 'Content-Type: application/json' -d '{\"state\": \"closed\"}' https://${USERNAME}:${PASSWORD}@csp-github.micropaas.io/api/v3/repos/Pipeline/${repo_name}/pulls/${pull_id}")
+
+    throw err
+  }
+}
+
+//Display input steps that ask the user to approve or abort a deployment to each environment
+def askApproval(String env_name, String env_id, String lambda_url, String jenkins_pr_url, String github_pull_req) {
+
+  def id = "Deploy" + env_id
+  def message = "Deploy To " + env_name + "?"
+  env_id = env_id.toLowerCase()
+
+  def button = { action, environment ->
+    "[![" + action + "](https://s3.amazonaws.com/gsa-iae-hosting-public-files/public-files/" + action + ".jpg)](" + lambda_url + "?jenkins_url=" + jenkins_pr_url + "&action=" + action + "&env=" + environment + "&redirect=" + env.CHANGE_URL + ")"
+  }
+
+  def comment = { environment ->
+    "Hello, this is the CI/CD pipeline<br >If you want deploy to **" + environment + "** please click on *Continue*. <br >If you want to stop the deployment click on *Abort* <br >"
+  }
+
+  stage("$env_name Approval") {
+    node() {
+
+      body = comment(env_name) + button("abort", env_id) + button("continue", env_id)
+      post(body, github_pull_req)
+    }
+    // wait for approval/rejection
+    try {
+      timeout(time:5, unit:'MINUTES') { //14 days
+        input(id: id, message: message)
+      }
+    } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException err) {
+      currentBuild.result = 'FAILURE'
+      print "Aborted deployment"
+      post("CI/CD could not finish the deployment process because it has been **Aborted**.", github_pull_req)
+      throw err
+    }
+  }
 }
 
 //Run docker tag and build scripts with respect to deploy environments
-def push(String env_app, String git_sha, String repo_name) {
-    placeholder = env.JOB_NAME.split('/')
-    def dockerhub = "dockerhub-app-01.east1e.nonprod.dmz"
-    def short_commit="$git_sha".take(6)
-    repo_name = repo_name.toLowerCase();
-    echo "$repo_name"
+def push(String env_id, String env_name, String git_sha, String repo_name) {
 
-    switch (env_app){
-    	case "comp" :
-    		echo"env is: comp"
-    		//build and push image
-    		def devImg = docker.build("srvnonproddocker/$repo_name:$env_app-$short_commit")
-    		devImg.push("$comp-$short_commit")
-    		break
+  def short_commit="$git_sha".take(6)
+  repo_name = repo_name.toLowerCase();
+  env_id = env_id.toLowerCase()
+  echo "env is: $env_id"
 
-    	case "minc" :
-    		echo "env is: minc"
-    		//build and push image
-    		def masterImg = docker.build("srvnonproddocker/$repo_name:base")
-    		masterImg.tag("minc-$short_commit")
-    		print masterImg.id
-			masterImg.push("minc-$short_commit")
-			echo "minc image just pushed"
-			print masterImg.id
-    		break
+  stage("Build a Docker Image for $env_name") {
+    node() {
+      // Get all the files
+       unstash 'workspace'
+      // get dockerhub credentials
+      docker.withRegistry('http://dockerhub-app-01.east1e.nonprod.dmz/', 'nonprod-dockerhub') {
 
-    	case "prodlike" :
-    		echo "env is: prodlike"
-	    	//use previously pushed image
-	    	def masterImg = docker.image("srvnonproddocker/$repo_name:base")
-    		//tag with prodlike
-	    	masterImg.tag("prodlike-$short_commit")
-	    	print masterImg.id
-			//push re-tagged image to dockerhub
-			masterImg.push("prodlike-$short_commit")
-			echo "prodlike image just pushed"
-    		break
-    		
-    	case "prod" :
-    		echo "env is: prod"
-	    	//use previously pushed image
-	 		def masterImg = docker.image("srvnonproddocker/$repo_name:base")
-	    	//tag with prod
-	    	masterImg.tag("prod-$short_commit")
-	   	   	print masterImg.id
-			//push re-tagged image to dockerhub
-			masterImg.push("prod-$short_commit")
-    		break	
+        // We want to do different things based on what environment we are in
+        switch (env_id) {
+          case "comp":
+            //build and push image
+            def devImg = docker.build("srvnonproddocker/$repo_name:$env_id-$short_commit")
+            devImg.push("$env_id-$short_commit")
+            break
+
+          case "minc":
+            //build and push image
+            def masterImg = docker.build("srvnonproddocker/$repo_name:base")
+            masterImg.tag("$env_id-$short_commit")
+            masterImg.push("$env_id-$short_commit")
+            break
+
+          case ["prodlike", "prod"]:
+            //use previously pushed image
+            def masterImg = docker.image("srvnonproddocker/$repo_name:base")
+            masterImg.tag("$env_id-$short_commit")
+            masterImg.push("$env_id-$short_commit")
+            break
+        }
+      }
     }
-
+  }
+  echo "$env_id image just pushed"
 }
 
 
-//Display input steps that ask the user to approve or abort a deployment to each environment
-def askApproval(String env_app, String lambda_url, String jenkins_pr_url, String github_pull_req) {
-	//Comp input steps
-	if(env_app == 'comp') {
-		print 'Deploying to component'
-	     	sh("curl -XPOST -H 'Content-Type: application/json' -d '{\"body\": \"Hello, this is the CI/CD pipeline<br >If you want deploy to **Component** please click on *Continue*. <br >If you want to stop the deployment click on *Abort* <br >[![abort](https://s3.amazonaws.com/gsa-iae-hosting-public-files/public-files/abort.jpg)](${lambda_url}?jenkins_url=${jenkins_pr_url}&action=abort&env=DeployComp&redirect=${env.CHANGE_URL})         [![continue](https://s3.amazonaws.com/gsa-iae-hosting-public-files/public-files/continue.png)](${lambda_url}?jenkins_url=${jenkins_pr_url}&action=proceedEmpty&env=DeployComp&redirect=${env.CHANGE_URL}) \"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
-			timeout(time:5, unit:'MINUTES') { //14 days
-     			input(id: 'DeployComp', message: 'Deploy to Comp?')
-     		}
-     //Minc input steps
-	} else if(env_app == 'minc') {
-		print 'Deploying to minimum-capacity'
-     	  	sh("curl -XPOST -H 'Content-Type: application/json' -d '{\"body\": \"Hello, this is the CI/CD pipeline<br >If you want deploy to **MINIMUM-CAPACITY** please click on *Continue*. <br >If you want to stop the deployment click on *Abort* <br >[![abort](https://s3.amazonaws.com/gsa-iae-hosting-public-files/public-files/abort.jpg)](${lambda_url}?jenkins_url=${jenkins_pr_url}&action=abort&env=DeployMinc&redirect=${env.CHANGE_URL})         [![continue](https://s3.amazonaws.com/gsa-iae-hosting-public-files/public-files/continue.png)](${lambda_url}?jenkins_url=${jenkins_pr_url}&action=proceedEmpty&env=DeployMinc&redirect=${env.CHANGE_URL}) \"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
-     		timeout(time:5, unit:'MINUTES') {
-     			input(id: 'DeployMinc', message: 'Deploy to Minc?')
-     		}
-     //Prodlike input steps
-	} else if(env_app == 'prodlike') {
-		print 'Deploying to prod-like'
-			sh("curl -XPOST -H 'Content-Type: application/json' -d '{\"body\": \"Hello, this is the CI/CD pipeline<br >If you want deploy to **PRODUCTION-LIKE** please click on *Continue*. <br >If you want to stop the deployment click on *Abort* <br >[![abort](https://s3.amazonaws.com/gsa-iae-hosting-public-files/public-files/abort.jpg)](${lambda_url}?jenkins_url=${jenkins_pr_url}&action=abort&env=DeployProdLike&redirect=${env.CHANGE_URL})         [![continue](https://s3.amazonaws.com/gsa-iae-hosting-public-files/public-files/continue.png)](${lambda_url}?jenkins_url=${jenkins_pr_url}&action=proceedEmpty&env=DeployProdLike&redirect=${env.CHANGE_URL}) \"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
-			timeout(time:5, unit:'MINUTES') {
-     			input(id: 'DeployProdLike', message: 'Deploy to Prod-Like?')
-     		}
-     //Prod input steps
-	} else if(env_app == 'prod') {
-		print 'Deploying to prod'
-     		sh("curl -XPOST -H 'Content-Type: application/json' -d '{\"body\": \"Hello, this is the CI/CD pipeline<br >If you want deploy to **PRODUCTION** please click on *Continue*. <br >If you want to stop the deployment click on *Abort* <br >[![abort](https://s3.amazonaws.com/gsa-iae-hosting-public-files/public-files/abort.jpg)](${lambda_url}?jenkins_url=${jenkins_pr_url}&action=abort&env=DeployProd&redirect=${env.CHANGE_URL})         [![continue](https://s3.amazonaws.com/gsa-iae-hosting-public-files/public-files/continue.png)](${lambda_url}?jenkins_url=${jenkins_pr_url}&action=proceedEmpty&env=DeployProd&redirect=${env.CHANGE_URL}) \"}' https://${USERNAME}:${PASSWORD}@${github_pull_req}")
-			timeout(time:5, unit:'MINUTES') {
-     			input(id: 'DeployProd', message: 'Deploy to Prod?')
-     		}
-	}
+//Deploy application
+def deploy(String env_id, String env_name, String github_pull_req, String org_name, String repo_name) {
+  def marketplace_url="http://marketplace-app-03.east1a.dev:3000/api/paas/docker/compose"
+  def marketplace_prefix="app_env=${env_id}\\&repo_name=${org_name}/${repo_name}"
+
+  stage("Deploy To $env_name") {
+    node() {
+      // Get all the files
+       unstash 'workspace'
+
+      sh("echo This is p1 ${env_id}")
+      sh("echo This is p2 ${repo_name}")
+      sh("echo This is p3 ${marketplace_url}")
+      sh("echo This is p4 ${marketplace_prefix}")
+      sh("echo Getting dependecies")
+      sh("echo Getting the Compose file")
+      sh("echo This is p4 ${marketplace_prefix}")
+      sh("curl -o docker-compose.yml ${marketplace_url}?${marketplace_prefix}")
+      sh("curl -o docker-config.json ${marketplace_url}/config?${marketplace_prefix}")
+      def APP_ID = sh (
+            script: "cat docker-config.json | python -c \"import sys, json; print json.load(sys.stdin)[\'app_id\']\"",
+            returnStdout: true
+      ).trim()
+      
+      def APP_NAME = sh (
+            script: "cat docker-config.json | python -c \"import sys, json; print json.load(sys.stdin)[\'app_name\']\"",
+            returnStdout: true
+      ).trim()
+      
+      def paas_env = sh (
+            script: "cat docker-config.json | python -c \"import sys, json; print json.load(sys.stdin)[\'platform_env_shortname\']\"",
+            returnStdout: true
+      ).trim()
+      
+      def zone_id
+      switch(paas_env) {
+        case "prod" :
+          zone_id="Z1GGLSC20EJUMD"
+          break
+        case "staging" :
+          zone_id="Z3SKNKRIDG9N8A"
+          break
+        case "dev" :
+          zone_id="ZXC0DKN8MY5US"
+          break
+      }
+      
+      sh("echo Setting Variables ========\
+      && CERT_PATH=/var/lib/jenkins\
+      && CA_CERT=$CERT_PATH/ca.pem\
+      && CLIENT_KEY=$CERT_PATH/server.key\
+      && CLIENT_CERT=$CERT_PATH/server.pem\
+      && SWARM_PORT=3376\
+      && DOCKER_HUB=dhe-app-01.east1a.prod\
+      && MARKETPLACE=iae-portal-app.east1a.$paas_env:3000\
+      && source /var/lib/jenkins/bundle/env.sh\
+      && echo \"==== running docker version to ensure connection to local docker client/server and swarm master and compose version\"\
+      && docker version\
+      && docker-compose --version\
+      && COMPOSE_YML=`pwd`/docker-compose.yml\
+      && echo =========COMPOSE FILE============\
+      && cat $COMPOSE_YML\
+      && echo ===================================\
+      && echo \"Deploying the application ${APP_NAME} in ${env_id}\"\
+      && echo =============Pulling Images================================\
+      && COMPOSE_HTTP_TIMEOUT=400 docker-compose -p ${APP_NAME}${env_id} --verbose -f ${COMPOSE_YML} pull\
+      && echo ==============Deploying Containers=========================\
+      && source /var/lib/jenkins/bundle/env.sh && COMPOSE_HTTP_TIMEOUT=400 docker-compose -p ${APP_NAME}${env_id} --verbose -f ${COMPOSE_YML} up -d\
+      && deploy -env=/var/lib/jenkins/bundle/env.sh -f=docker-compose.yml -project=${APP_NAME}${env_id} scale 2\
+      && echo ================Listing containers in this stack===================\
+      && COMPOSE_HTTP_TIMEOUT=400 docker-compose -p ${APP_NAME}${env_id} --verbose -f ${COMPOSE_YML} ps\
+      && sleep 5\
+      && echo ===updating DNS===\
+      && aws route53 change-resource-record-sets --hosted-zone-id $zone_id --change-batch '{\"Comment\": \"A new record set for the zone.\", \"Changes\": [{\"Action\": \"CREATE\",\"ResourceRecordSet\": {\"Name\": \"'\"*.$APP_ID.$APP_NAME.$paas_env\"'\",\"Type\": \"A\",\"AliasTarget\": {\"HostedZoneId\":\"'\"$zone_id\"'\",\"DNSName\":\"interlock.dev.\",\"EvaluateTargetHealth\": false}}}]}'\
+      && echo ====sending app url back to marketplace ====\
+      && app_url=\"$env_id.$APP_ID.$APP_NAME.$paas_env\"\
+      && echo ======interlock logs\
+      && INTERLOCK_LOGS=\$($SWARM_CMD logs --tail 100 interlock)\
+      && echo \$INTERLOCK_LOGS\
+      && echo ======Logs from the service====\
+      && echo ${app_url}\
+      && echo env is ${env_id}\
+      && echo \"THIS APP IS AVAILABLE HERE: ${app_url} \"")
+
+      post("Your service has been deployed to the **" + env_name + "** Environment", github_pull_req)
+    }
+  }
 }
 
+def post(String body, String url) {
+  sh("curl -XPOST -H 'Content-Type: application/json' -d '{\"body\": \"${body} \"}' ${url}")
+}
