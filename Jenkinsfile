@@ -44,9 +44,10 @@ if (target_branch == null) { //Run tests on push to a feature branch
        //  }else
        // echo "Tests Passed"
        try{
-        sh "npm install"
+        sh "npm install 2>&1 | tee log.txt"
        }catch(err){
         echo "Test Failure"
+        currentBuild.result = 'FAILURE'
        }
       }
 
