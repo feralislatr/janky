@@ -47,7 +47,9 @@ if (target_branch == null) { //Run tests on push to a feature branch
        //sh "node test"
        sh "npm install 2>&1 | tee log.txt"
        def log=readFile('log.txt').trim()
-       if (log =~ .*"ERR!+".*){
+       def p = ~/ERR!+/
+        assert p instanceof Pattern
+       if (log =~ p){
         echo "Test Failure"
         currentBuild.result = 'FAILURE'
        }
