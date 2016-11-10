@@ -33,21 +33,12 @@ if (target_branch == null) { //Run tests on push to a feature branch
       print "run unit tests"
       def testImg = docker.build("srvnonproddocker/test-image:$short_commit")
       testImg.inside {
-        sh "npm cache clean"
-        //npm install
-        //need to take this out of dockerfile
-       //  if (something =~ .*"ERR!+".*){
-       //    def fileName = "npm-debug.log"
-       //    new File("${WORKSPACE}/propfile") << 'hello')
-       //    echo "Test Failure"
-       //    currentBuild.result = 'FAILURE'
-       //    exit 1
-       //  }else
-       // echo "Tests Passed"
+        //sh "npm cache clean"
        
        //sh "node test"
-       //sh "npm install 2>&1 | tee log.txt"
-       String log=readFile('npm-debug.log')
+       sh "npm install 2>&1 | tee log.txt"
+       String log=readFile('log.txt')
+       //String log=readFile('npm-debug.log')
        if ("$log" =~ ".*ERR!+.*"){
         echo "Test Failure"
         //currentBuild.result = 'FAILURE'
