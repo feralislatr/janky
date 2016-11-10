@@ -46,8 +46,8 @@ if (target_branch == null) { //Run tests on push to a feature branch
        // echo "Tests Passed"
        
        //sh "node test"
-       sh "npm install 2>&1 | tee log.txt"
-       //String log=readFile('npm-debug.log')
+       //sh "npm install 2>&1 | tee log.txt"
+       String log=readFile('npm-debug.log')
        if ("$log" =~ ".*ERR!+.*"){
         echo "Test Failure"
         //currentBuild.result = 'FAILURE'
