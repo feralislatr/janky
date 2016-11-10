@@ -6,12 +6,19 @@ def target_branch = env.CHANGE_TARGET
 
 node() {
   sh "env | sort"
+
 }
 
 if (target_branch == null) { //Run tests on push to a feature branch
   node() {
     //Get current commit from github
     checkout scm
+
+    def git_sha = sh (
+      script: 'git rev-parse HEAD',
+      returnStdout: true
+    ).trim()
+    def short_commit="$git_sha".take(6)
 
     stage('Test a Push') {
       print "Run tests"
@@ -24,7 +31,7 @@ if (target_branch == null) { //Run tests on push to a feature branch
     //unit tests run by Dockerfile
     stage('Run Unit tests') {
       print "run unit tests"
-      def testImg = docker.build("srvnonproddocker/test-image:$env_id-$short_commit")
+      def testImg = docker.build("srvnonproddocker/test-image:$short_commit")
       testImg.inside {
         //npm install
         //need to take this out of dockerfile
