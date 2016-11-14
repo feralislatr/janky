@@ -27,7 +27,7 @@ if (target_branch == null) { //Run tests on push to a feature branch
       def testImg = docker.build("srvnonproddocker/test-image:$short_commit")
       
       testImg.inside("-u root"){
-       sh "npm install //2>&1 | tee log.txt"
+       sh "npm install 2>&1 | tee log.txt"
        String log=readFile('log.txt')
        if ("$log" =~ ".*ERR!+.*"){
         echo "Test Failure"
