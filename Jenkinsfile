@@ -13,7 +13,15 @@ if (target_branch == null) { //Run tests on push to a feature branch
   node() {
     //Get current commit from github
     checkout scm
-
+    
+    git_sha = sh (
+          script: 'git rev-parse HEAD',
+          returnStdout: true
+        ).trim()
+        
+    // shorten the git commit hash to 6 digits for tagging
+    def short_commit="$git_sha".take(6)
+    
     stage('CI Tests') {
       print "Run Unit Tests"
       def testImg = docker.build("srvnonproddocker/test-image:$short_commit")
@@ -37,7 +45,8 @@ if (target_branch == null) { //Run tests on push to a feature branch
   }
 } else {
 
-  def github_url, org_name, repo_name, branch_name, git_sha
+  def github_url, org_name, repo_name, branch_name
+  //, git_sha
 
   try {
     stage('Initialize environment') {
