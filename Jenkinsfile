@@ -250,9 +250,8 @@ def build(String env_id, String env_name, String repo_name, String git_sha) {
 
           stage('CI Tests') {
             print "Run Unit Tests"
-            //testImg is null here
-            echo "tag: $tag"
-           testImg = docker.build("srvnonproddocker/$repo_name:$tag")
+         
+           testImg = docker.image("srvnonproddocker/$repo_name:$env_id-$short_commit")
            echo "hi testimg is not null"
             testImg.inside("-u root"){
                 sh "npm install 2>&1 | tee log.txt"
