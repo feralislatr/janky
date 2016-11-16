@@ -274,16 +274,67 @@ def build(String env_id, String env_name, String repo_name, String git_sha) {
 
 
 // Build, tag, and push a docker image for the specified environment
+// def push(String env_id, String env_name, String repo_name, String git_sha) {
+//   echo "push pls"
+//   echo "repo: $repo_name"
+//   echo "env: $env_id"
+//   // shorten the git commit hash to 6 digits for tagging
+//   short_commit="$git_sha".take(6)
+//   repo_name = repo_name.toLowerCase();
+//   env_id = env_id.toLowerCase()
+//   echo "env is: $env_id"
+
+
+//   stage("Build a Docker Image for $env_name") {
+//     node() {
+//       // load the workspace
+//       unstash 'workspace'
+//       // get dockerhub credentials
+//       docker.withRegistry('http://dockerhub-app-01.east1e.nonprod.dmz/', 'nonprod-dockerhub') {
+//         def devImg
+//         def masterImg
+//         // We want to do different things based on what environment we are in
+//         switch (env_id) {
+//           case "comp":
+//             //build and push image
+//             devImg = docker.image("srvnonproddocker/$repo_name:$env_id-$short_commit")
+//             devImg.push("$env_id-$short_commit")
+//             break
+
+//           case "minc":
+//             //build and push image
+//            masterImg = docker.image("srvnonproddocker/$repo_name:$env_id-$short_commit")
+//             //masterImg.tag("$env_id-$short_commit")
+//            echo "minc images before"
+//            sh "docker images | grep $short_commit"
+//             masterImg.push("$env_id-$short_commit")
+//             echo "minc images after"
+//             sh "docker images | grep $short_commit"
+
+//             break
+
+//           case ["prodlike", "prod"]:
+//             //use previously pushed image
+//             masterImg = docker.image("srvnonproddocker/$repo_name:$env_id-$short_commit")
+//            // masterImg.tag("$env_id-$short_commit")
+//             masterImg.push("$env_id-$short_commit")
+//             break
+//         }
+//       }
+//     }
+//   }
+//   echo "$repo_name:$env_id-$short_commit just pushed"
+// }
+
+
+// Build, tag, and push a docker image for the specified environment
 def push(String env_id, String env_name, String repo_name, String git_sha) {
-  echo "push pls"
-  echo "repo: $repo_name"
-  echo "env: $env_id"
+
   // shorten the git commit hash to 6 digits for tagging
-  short_commit="$git_sha".take(6)
+  def short_commit="$git_sha".take(6)
   repo_name = repo_name.toLowerCase();
   env_id = env_id.toLowerCase()
   echo "env is: $env_id"
-
 
   stage("Build a Docker Image for $env_name") {
     node() {
@@ -291,32 +342,26 @@ def push(String env_id, String env_name, String repo_name, String git_sha) {
       unstash 'workspace'
       // get dockerhub credentials
       docker.withRegistry('http://dockerhub-app-01.east1e.nonprod.dmz/', 'nonprod-dockerhub') {
-        def devImg
-        def masterImg
+
         // We want to do different things based on what environment we are in
         switch (env_id) {
           case "comp":
             //build and push image
-            devImg = docker.image("srvnonproddocker/$repo_name:$env_id-$short_commit")
+            def devImg = docker.build("srvnonproddocker/$repo_name:$env_id-$short_commit")
             devImg.push("$env_id-$short_commit")
             break
 
           case "minc":
             //build and push image
-           masterImg = docker.image("srvnonproddocker/$repo_name:$env_id-$short_commit")
-            //masterImg.tag("$env_id-$short_commit")
-           echo "minc images before"
-           sh "docker images | grep $short_commit"
+            def masterImg = docker.build("srvnonproddocker/$repo_name:base")
+            masterImg.tag("$env_id-$short_commit")
             masterImg.push("$env_id-$short_commit")
-            echo "minc images after"
-            sh "docker images | grep $short_commit"
-
             break
 
           case ["prodlike", "prod"]:
             //use previously pushed image
-            masterImg = docker.image("srvnonproddocker/$repo_name:$env_id-$short_commit")
-           // masterImg.tag("$env_id-$short_commit")
+            def masterImg = docker.image("srvnonproddocker/$repo_name:base")
+            masterImg.tag("$env_id-$short_commit")
             masterImg.push("$env_id-$short_commit")
             break
         }
