@@ -30,28 +30,28 @@ if (target_branch == null) { //Run tests on push to a feature branch
     //shorten the git commit hash to 6 digits for tagging
     short_commit="$git_sha".take(6)
 
-  stage('CI Tests') {
-      print "Run Unit Tests"
-    //Define image for running CI tests on push
-   
+    stage('CI Tests') {
+        print "Run Unit Tests"
+      //Define image for running CI tests on push
+     
 
-   def testImg = docker.build("srvnonproddocker/$repo-name:test-$short_commit")
-    echo "hi i'm here"
+     def testImg = docker.build("srvnonproddocker/$repo-name:test-$short_commit")
+      echo "hi i'm here"
 
-  
-      testImg.inside("-u root"){
-        sh "npm install 2>&1 | tee log.txt"
-        String log=readFile('log.txt')
-       echo "Ran Tests"
-      if ("$log" =~ ".*ERR!+.*"){
-        echo "Test Failure"
-        currentBuild.result = 'FAILURE'
-       } else{
-        echo "Tests Passed"
-       }
-          }
-      }
+    
+        testImg.inside("-u root"){
+          sh "npm install 2>&1 | tee log.txt"
+          String log=readFile('log.txt')
+         echo "Ran Tests"
+        if ("$log" =~ ".*ERR!+.*"){
+          echo "Test Failure"
+          currentBuild.result = 'FAILURE'
+         } else{
+          echo "Tests Passed"
+         }
+        }
     }
+  }
 
 } else {
 
@@ -208,32 +208,8 @@ def askApproval(String env_id, String env_name, String github_url) {
 }
 
 
-// //Run continuous integration tests
-// def ci(String tag){
-//   stage('CI Tests') {
-//       print "Run Unit Tests"
-//       echo "tag: $tag"
-//       def testImg = docker.build("srvnonproddocker/$repo_name:$tag")
-//       testImg.inside("-u root"){
-//         sh "npm install 2>&1 | tee log.txt"
-//         String log=readFile('log.txt')
-//        echo "Ran Tests"
-//       if ("$log" =~ ".*ERR!+.*"){
-//         echo "Test Failure"
-//         currentBuild.result = 'FAILURE'
-//        } else{
-//         echo "Tests Passed"
-//        }
-//       }
-//   }
-// }
-
 //Build image and run CI
 def build(String env_id, String env_name, String repo_name, String git_sha) {
-  // if(target_branch == null){
-  //   env_id = "test"
-  //   env_name = "test"
-  // }
 
   stage("Build a Docker Image") {
     node() {
@@ -330,10 +306,10 @@ def push(String env_id, String env_name, String repo_name, String git_sha) {
            masterImg = docker.image("srvnonproddocker/$repo_name:$env_id-$short_commit")
             //masterImg.tag("$env_id-$short_commit")
            echo "minc images before"
-            sh "docker images | grep ${short_commit}"
+            sh "docker images \| grep ${short_commit}"
             masterImg.push("$env_id-$short_commit")
             echo "minc images after"
-            sh "docker images | grep ${short_commit}"
+            sh "docker images \| grep ${short_commit}"
 
             break
 
