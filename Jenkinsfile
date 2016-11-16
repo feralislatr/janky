@@ -225,7 +225,7 @@ def build(String env_id, String env_name, String repo_name, String git_sha) {
 
 
         // get dockerhub credentials
-        docker.withRegistry('http://dockerhub-app-01.east1e.nonprod.dmz/', 'nonprod-dockerhub') {
+        //docker.withRegistry('http://dockerhub-app-01.east1e.nonprod.dmz/', 'nonprod-dockerhub') {
           def testImg
           //String tag
           // We want to do different things based on what environment we are in
@@ -260,7 +260,7 @@ def build(String env_id, String env_name, String repo_name, String git_sha) {
                   print "Run Unit Tests"
                   //testImg is null here
                   
-                 testImg = docker.image("http://dockerhub-app-01.east1e.nonprod.dmz/srvnonproddocker/$repo_name:$env_id-$short_commit")
+                 testImg = docker.image("srvnonproddocker/$repo_name:$env_id-$short_commit")
                  echo "hi testimg is not null"
                   testImg.inside("-u root"){
                       sh "npm install 2>&1 | tee log.txt"
@@ -275,7 +275,7 @@ def build(String env_id, String env_name, String repo_name, String git_sha) {
                   }
                 }
 
-        }
+       // }
       }
   }
 }
