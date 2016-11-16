@@ -211,15 +211,14 @@ def askApproval(String env_id, String env_name, String github_url) {
 //Build image and run CI
 def build(String env_id, String env_name, String repo_name, String git_sha) {
 
+  stage("Build a Docker Image") {
     node() {
       // load the workspace
       unstash 'workspace'
-
-
-     //shorten the git commit hash to 6 digits for tagging
-      short_commit="$git_sha".take(6)
-
   
+       //shorten the git commit hash to 6 digits for tagging
+        short_commit="$git_sha".take(6)
+        
       // get dockerhub credentials
       docker.withRegistry('http://dockerhub-app-01.east1e.nonprod.dmz/', 'nonprod-dockerhub') {
         def testImg
@@ -252,28 +251,29 @@ def build(String env_id, String env_name, String repo_name, String git_sha) {
             break
         }
 
-          stage('CI Tests') {
-            print "Run Unit Tests"
-         
-           testImg = docker.image("srvnonproddocker/$repo_name:$env_id-$short_commit")
-           echo "hi testimg is not null"
-            testImg.inside("-u root"){
-                sh "npm install 2>&1 | tee log.txt"
-              log=readFile('log.txt')
-              echo "Ran Tests"
-              if ("$log" =~ ".*ERR!+.*"){
-                echo "Test Failure"
-                currentBuild.result = 'FAILURE'
-              } else{
-                echo "Tests Passed"
+              stage('CI Tests') {
+                print "Run Unit Tests"
+                //testImg is null here
+                
+               testImg = docker.image("srvnonproddocker/$repo_name:$env_id-$short_commit")
+               echo "hi testimg is not null"
+                testImg.inside("-u root"){
+                    sh "npm install 2>&1 | tee log.txt"
+                  log=readFile('log.txt')
+                  echo "Ran Tests"
+                  if ("$log" =~ ".*ERR!+.*"){
+                    echo "Test Failure"
+                    currentBuild.result = 'FAILURE'
+                  } else{
+                    echo "Tests Passed"
+                  }
+                }
               }
-            }
-          }
 
       }
     }
   }
-
+}
 
 
 // Build, tag, and push a docker image for the specified environment
