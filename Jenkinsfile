@@ -378,6 +378,7 @@ def deploy(String env_id, String env_name, String github_url, String org_name, S
   env_id = env_id.toLowerCase()
   def marketplace_url="http://marketplace-app-03.east1a.dev:3000"
   def marketplace_path="api/paas/docker/compose"
+  def app_url
   
   def marketplace_args
   //def marketplace_args="app_env=$env_id\\&repo_name=$org_name/$repo_name"
@@ -437,7 +438,7 @@ def deploy(String env_id, String env_name, String github_url, String org_name, S
       env.SWARM_PORT = "3376"
       env.MARKETPLACE = marketplace_url
 
-      def app_url = "$env_id.$APP_ID.$APP_NAME.$paas_env"
+      app_url = "$env_id.$APP_ID.$APP_NAME.$paas_env"
 
       // sh "cp -a /var/lib/jenkins/bundle/* ./"
 
