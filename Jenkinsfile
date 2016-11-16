@@ -30,28 +30,32 @@ if (target_branch == null) { //Run tests on push to a feature branch
     //shorten the git commit hash to 6 digits for tagging
     short_commit="$git_sha".take(6)
 
-    stage('CI Tests') {
-        print "Run Unit Tests"
-      //Define image for running CI tests on push
+    // stage('CI Tests') {
+    //     print "Run Unit Tests"
+    //   //Define image for running CI tests on push
      
 
-     def testImg = docker.build("srvnonproddocker/$repo-name:test-$short_commit")
-      echo "hi i'm here"
-
+    //  def testImg = docker.build("srvnonproddocker/$repo-name:test-$short_commit")
+    //   echo "hi i'm here"
     
-        testImg.inside("-u root"){
-          sh "npm install 2>&1 | tee log.txt"
-          String log=readFile('log.txt')
-         echo "Ran Tests"
-        if ("$log" =~ ".*ERR!+.*"){
-          echo "Test Failure"
-          currentBuild.result = 'FAILURE'
-         } else{
-          echo "Tests Passed"
-         }
-        }
-    }
+    //     testImg.inside("-u root"){
+    //       sh "npm install 2>&1 | tee log.txt"
+    //       log=readFile('log.txt')
+    //      echo "Ran Tests"
+    //     if ("$log" =~ ".*ERR!+.*"){
+    //       echo "Test Failure"
+    //       currentBuild.result = 'FAILURE'
+    //      } else{
+    //       echo "Tests Passed"
+    //      }
+    //     }
+    // }
+
   }
+
+  //ci(env_id, repo_name, git_sha)
+
+
 
 } else {
 
@@ -98,6 +102,7 @@ if (target_branch == null) { //Run tests on push to a feature branch
       env_name = "Component"
 
       build(env_id, env_name, repo_name, git_sha)
+      //ci(env_id, repo_name, git_sha)
       // Post comment on pull request and wait for approval to continue
       askApproval(env_id, env_name, github_url)
       // Create and push docker image to dockerhub
@@ -114,6 +119,7 @@ if (target_branch == null) { //Run tests on push to a feature branch
 
       echo " hi i'm building"
       build(env_id, env_name, repo_name, git_sha)
+     // ci(env_id, repo_name, git_sha)
       // Post comment on pull request and wait for approval to continue
       askApproval(env_id, env_name, github_url)
       // Create and push docker image to dockerhub
@@ -125,8 +131,7 @@ if (target_branch == null) { //Run tests on push to a feature branch
       env_id = "ProdLike"
       env_name = "Production-Like"
 
-
-      build(env_id, env_name, repo_name, git_sha)
+      //ci(env_id, repo_name, git_sha)
       // Post comment on pull request and wait for approval to continue
       askApproval(env_id, env_name, github_url)
       // Create and push docker image to dockerhub
@@ -138,8 +143,7 @@ if (target_branch == null) { //Run tests on push to a feature branch
       env_id = "Prod"
       env_name = "Production"
 
-
-      build(env_id, env_name, repo_name, git_sha)
+      //ci(env_id, repo_name, git_sha)
       // Post comment on pull request and wait for approval to continue
       askApproval(env_id, env_name, github_url)
       // Create and push docker image to dockerhub
@@ -208,6 +212,35 @@ def askApproval(String env_id, String env_name, String github_url) {
 }
 
 
+// //Run CI Tests
+// def ci(String env_id, String repo_name, String git_sha){
+
+// //shorten the git commit hash to 6 digits for tagging
+// short_commit="$git_sha".take(6)
+
+//  stage('CI Tests') {
+//         print "Run Unit Tests"
+//       //Define image for running CI tests on push
+     
+
+//      def testImg = docker.build("srvnonproddocker/$repo_name:test-$short_commit")
+//       echo "hi i'm here"
+    
+//         testImg.inside("-u root"){
+//           sh "npm install 2>&1 | tee log.txt"
+//           log=readFile('log.txt')
+//          echo "Ran Tests"
+//         if ("$log" =~ ".*ERR!+.*"){
+//           echo "Test Failure"
+//           currentBuild.result = 'FAILURE'
+//          } else{
+//           echo "Tests Passed"
+//          }
+//         }
+//     }
+// }
+
+
 //Build image and run CI
 def build(String env_id, String env_name, String repo_name, String git_sha) {
     echo "build pls"
@@ -221,11 +254,10 @@ def build(String env_id, String env_name, String repo_name, String git_sha) {
     
       node() {
         // load the workspace
-        unstash 'workspace'
+        ////unstash 'workspace'
 
 
         // get dockerhub credentials
-        //docker.withRegistry('http://dockerhub-app-01.east1e.nonprod.dmz/', 'nonprod-dockerhub') {
           def testImg
           //String tag
           // We want to do different things based on what environment we are in
@@ -256,26 +288,24 @@ def build(String env_id, String env_name, String repo_name, String git_sha) {
               break
           }
 
-                stage('CI Tests') {
-                  print "Run Unit Tests"
-                  //testImg is null here
+                // stage('CI Tests') {
+                //   print "Run Unit Tests"
+                //   //testImg is null here
                   
-                 testImg = docker.image("srvnonproddocker/$repo_name:$env_id-$short_commit")
-                 echo "hi testimg is not null"
-                  testImg.inside("-u root"){
-                      sh "npm install 2>&1 | tee log.txt"
-                    log=readFile('log.txt')
-                    echo "Ran Tests"
-                    if ("$log" =~ ".*ERR!+.*"){
-                      echo "Test Failure"
-                      currentBuild.result = 'FAILURE'
-                    } else{
-                      echo "Tests Passed"
-                    }
-                  }
-                }
-
-       // }
+                //  testImg = docker.image("srvnonproddocker/$repo_name:$env_id-$short_commit")
+                //  echo "hi testimg is not null"
+                //   testImg.inside("-u root"){
+                //       sh "npm install 2>&1 | tee log.txt"
+                //     log=readFile('log.txt')
+                //     echo "Ran Tests"
+                //     if ("$log" =~ ".*ERR!+.*"){
+                //       echo "Test Failure"
+                //       currentBuild.result = 'FAILURE'
+                //     } else{
+                //       echo "Tests Passed"
+                //     }
+                //   }
+                // }
       }
   }
 }
@@ -296,7 +326,7 @@ def push(String env_id, String env_name, String repo_name, String git_sha) {
   stage("Push Docker Image for $env_name") {
     node() {
       // load the workspace
-      unstash 'workspace'
+      ////unstash 'workspace'
       // get dockerhub credentials
       docker.withRegistry('http://dockerhub-app-01.east1e.nonprod.dmz/', 'nonprod-dockerhub') {
         def devImg
@@ -329,9 +359,10 @@ def push(String env_id, String env_name, String repo_name, String git_sha) {
             break
         }
       }
+    	echo "$repo_name:$env_id-$short_commit just pushed"
     }
   }
-  echo "$repo_name:$env_id-$short_commit just pushed"
+  
 }
 
 
@@ -353,7 +384,7 @@ def deploy(String env_id, String env_name, String github_url, String org_name, S
   stage("Deploy To $env_name") {
     node() {
       // Get all the files
-      unstash 'workspace'
+      ////unstash 'workspace'
 
       print "env_id: $env_id"
       print "repo_name: $repo_name"
