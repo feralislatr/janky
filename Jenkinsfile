@@ -51,11 +51,12 @@ if (target_branch == null) { //Run tests on push to a feature branch
         }
 
 
-        print("Stashing now")
-        stash includes: '*', name: "${env.JOB_BASE_NAME}"
-        unstash "${env.JOB_BASE_NAME}"
+        
     }
 
+      print("Stashing now")
+        stash includes: '*', name: "${env.JOB_BASE_NAME}"
+        unstash "${env.JOB_BASE_NAME}"
   }
 
   //ci(env_id, repo_name, git_sha)
@@ -382,7 +383,7 @@ def deploy(String env_id, String env_name, String github_url, String org_name, S
     node() {
      // Get all the files
       unstash "${env.JOB_BASE_NAME}"
-      
+
       print "env_id: $env_id"
       print "repo_name: $repo_name"
       print "marketplace_url: $marketplace_url"
