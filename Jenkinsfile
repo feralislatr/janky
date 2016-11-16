@@ -223,7 +223,7 @@ short_commit="$git_sha".take(6)
       //Define image for running CI tests on push
      
 
-     def testImg = docker.build("srvnonproddocker/$repo-name:test-$short_commit")
+     def testImg = docker.build("srvnonproddocker/$repo_name:test-$short_commit")
       echo "hi i'm here"
     
         testImg.inside("-u root"){
