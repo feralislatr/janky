@@ -54,9 +54,7 @@ if (target_branch == null) { //Run tests on push to a feature branch
         
     }
 
-      print("Stashing now")
-        stash includes: '*', name: "${env.JOB_BASE_NAME}"
-        unstash "${env.JOB_BASE_NAME}"
+  
   }
 
   //ci(env_id, repo_name, git_sha)
@@ -95,7 +93,9 @@ if (target_branch == null) { //Run tests on push to a feature branch
         short_commit="$git_sha".take(6)
 
 
-        stash includes: '*', name: 'workspace'
+        print("Stashing now")
+        stash includes: '*', name: "${env.JOB_BASE_NAME}"
+        unstash "${env.JOB_BASE_NAME}"
       }
     }
 
