@@ -131,7 +131,7 @@ if (target_branch == null) { //Run tests on push to a feature branch
       env_id = "ProdLike"
       env_name = "Production-Like"
 
-      ci(env_id, repo_name, git_sha)
+      //ci(env_id, repo_name, git_sha)
       // Post comment on pull request and wait for approval to continue
       askApproval(env_id, env_name, github_url)
       // Create and push docker image to dockerhub
@@ -289,24 +289,6 @@ def build(String env_id, String env_name, String repo_name, String git_sha) {
               break
           }
 
-                stage('CI Tests') {
-                  print "Run Unit Tests"
-                  //testImg is null here
-                  
-                 testImg = docker.image("srvnonproddocker/$repo_name:$env_id-$short_commit")
-                 echo "hi testimg is not null"
-                  testImg.inside("-u root"){
-                      sh "npm install 2>&1 | tee log.txt"
-                    log=readFile('log.txt')
-                    echo "Ran Tests"
-                    if ("$log" =~ ".*ERR!+.*"){
-                      echo "Test Failure"
-                      currentBuild.result = 'FAILURE'
-                    } else{
-                      echo "Tests Passed"
-                    }
-                  }
-                }
       }
   }
 }
