@@ -210,68 +210,73 @@ def askApproval(String env_id, String env_name, String github_url) {
 
 //Build image and run CI
 def build(String env_id, String env_name, String repo_name, String git_sha) {
+    echo "build pls"
 
-  stage("Build a Docker Image") {
-    node() {
-      // load the workspace
-      unstash 'workspace'
-  
-       //shorten the git commit hash to 6 digits for tagging
-        short_commit="$git_sha".take(6)
-        
-      // get dockerhub credentials
-      docker.withRegistry('http://dockerhub-app-01.east1e.nonprod.dmz/', 'nonprod-dockerhub') {
-        def testImg
-        //String tag
-        // We want to do different things based on what environment we are in
-        switch (env_id) {
-          case "comp":
+    // shorten the git commit hash to 6 digits for tagging
+    short_commit="$git_sha".take(6)
+    repo_name = repo_name.toLowerCase();
+    env_id = env_id.toLowerCase()
+    echo "env is: $env_id"
+    stage("Build a Docker Image") {
+    
+      node() {
+        // load the workspace
+        unstash 'workspace'
 
-            //build and push image
-            testImg = docker.build("srvnonproddocker/$repo_name:$env_id-$short_commit")
-            //tag = "$env_id-$short_commit"
 
-            break
+        // get dockerhub credentials
+        docker.withRegistry('http://dockerhub-app-01.east1e.nonprod.dmz/', 'nonprod-dockerhub') {
+          def testImg
+          //String tag
+          // We want to do different things based on what environment we are in
+          switch (env_id) {
+            case "comp":
 
-          case "minc":
-            //build and push image
-            testImg = docker.build("srvnonproddocker/$repo_name:base")
-            testImg.tag("$env_id-$short_commit")
-            //tag = "$env_id-$short_commit"
-            echo "minc images build"
-            sh "docker images | grep ${short_commit}"
-            break
+              //build and push image
+              testImg = docker.build("srvnonproddocker/$repo_name:$env_id-$short_commit")
+              //tag = "$env_id-$short_commit"
 
-          case ["prodlike", "prod"]:
-            //use previously pushed image
-            testImg = docker.image("srvnonproddocker/$repo_name:base")
-            testImg.tag("$env_id-$short_commit")
-            //tag = "$env_id-$short_commit"
+              break
 
-            break
-        }
+            case "minc":
+              //build and push image
+              testImg = docker.build("srvnonproddocker/$repo_name:base")
+              testImg.tag("$env_id-$short_commit")
+              //tag = "$env_id-$short_commit"
+              echo "minc images build"
+              sh "docker images | grep ${short_commit}"
+              break
 
-              stage('CI Tests') {
-                print "Run Unit Tests"
-                //testImg is null here
-                
-               testImg = docker.image("srvnonproddocker/$repo_name:$env_id-$short_commit")
-               echo "hi testimg is not null"
-                testImg.inside("-u root"){
-                    sh "npm install 2>&1 | tee log.txt"
-                  log=readFile('log.txt')
-                  echo "Ran Tests"
-                  if ("$log" =~ ".*ERR!+.*"){
-                    echo "Test Failure"
-                    currentBuild.result = 'FAILURE'
-                  } else{
-                    echo "Tests Passed"
+            case ["prodlike", "prod"]:
+              //use previously pushed image
+              testImg = docker.image("srvnonproddocker/$repo_name:base")
+              testImg.tag("$env_id-$short_commit")
+              //tag = "$env_id-$short_commit"
+
+              break
+          }
+
+                stage('CI Tests') {
+                  print "Run Unit Tests"
+                  //testImg is null here
+                  
+                 testImg = docker.image("srvnonproddocker/$repo_name:$env_id-$short_commit")
+                 echo "hi testimg is not null"
+                  testImg.inside("-u root"){
+                      sh "npm install 2>&1 | tee log.txt"
+                    log=readFile('log.txt')
+                    echo "Ran Tests"
+                    if ("$log" =~ ".*ERR!+.*"){
+                      echo "Test Failure"
+                      currentBuild.result = 'FAILURE'
+                    } else{
+                      echo "Tests Passed"
+                    }
                   }
                 }
-              }
 
+        }
       }
-    }
   }
 }
 
@@ -288,7 +293,7 @@ def push(String env_id, String env_name, String repo_name, String git_sha) {
   echo "env is: $env_id"
 
 
-  stage("Build a Docker Image for $env_name") {
+  stage("Push Docker Image for $env_name") {
     node() {
       // load the workspace
       unstash 'workspace'
