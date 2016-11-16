@@ -306,10 +306,10 @@ def push(String env_id, String env_name, String repo_name, String git_sha) {
            masterImg = docker.image("srvnonproddocker/$repo_name:$env_id-$short_commit")
             //masterImg.tag("$env_id-$short_commit")
            echo "minc images before"
-            sh "docker images | grep ${short_commit}"
+           sh "docker images | grep $short_commit"
             masterImg.push("$env_id-$short_commit")
             echo "minc images after"
-            sh "docker images | grep ${short_commit}"
+            sh "docker images | grep $short_commit"
 
             break
 
