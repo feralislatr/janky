@@ -378,7 +378,6 @@ def deploy(String env_id, String env_name, String github_url, String org_name, S
   env_id = env_id.toLowerCase()
   def marketplace_url="http://marketplace-app-03.east1a.dev:3000"
   def marketplace_path="api/paas/docker/compose"
-  def app_url
   
   def marketplace_args
   //def marketplace_args="app_env=$env_id\\&repo_name=$org_name/$repo_name"
@@ -438,7 +437,7 @@ def deploy(String env_id, String env_name, String github_url, String org_name, S
       env.SWARM_PORT = "3376"
       env.MARKETPLACE = marketplace_url
 
-      app_url = "$env_id.$APP_ID.$APP_NAME.$paas_env"
+      def app_url = "$env_id.$APP_ID.$APP_NAME.$paas_env"
 
       // sh "cp -a /var/lib/jenkins/bundle/* ./"
 
@@ -447,38 +446,38 @@ def deploy(String env_id, String env_name, String github_url, String org_name, S
       docker.withRegistry('http://dockerhub-app-01.east1e.nonprod.dmz/', 'nonprod-dockerhub') {
        //test symlink issues
         echo "safezone"
-  sh("BLOCK=hi && echo BLOCK")
-  sh("echo Setting Variables ========\
-  && CERT_PATH=/var/lib/jenkins/bundle\
-  && CA_CERT=\$CERT_PATH/ca.pem\
-  && CLIENT_KEY=\$CERT_PATH/server.key\
-  && CLIENT_CERT=\$CERT_PATH/server.pem\
-  && SWARM_PORT=3376\
-  && DOCKER_HUB=dhe-app-01.east1a.prod\
-  && MARKETPLACE=iae-portal-app.east1a.${paas_env}:3000\
-  && source /var/lib/jenkins/bundle/env.sh\
-  && echo \"==== running docker version to ensure connection to local docker client/server and swarm master and compose version\"\
-  && docker version\
-  && docker-compose --version\
-  && COMPOSE_YML=`pwd`/docker-compose.yml\
-  && echo =========COMPOSE FILE============\
-  && cat \$COMPOSE_YML\
-  && echo ===================================\
-  && echo \"Deploying the application ${APP_NAME} in ${env_id}\"\
-  && echo =============Pulling Images================================\
-  && COMPOSE_HTTP_TIMEOUT=400 docker-compose -p ${APP_NAME}${env_id} --verbose -f \$COMPOSE_YML pull\
-  && echo ==============Deploying Containers=========================\
-  && source /var/lib/jenkins/bundle/env.sh && COMPOSE_HTTP_TIMEOUT=400 docker-compose -p ${APP_NAME}${env_id} --verbose -f \$COMPOSE_YML up -d\
-  && echo ================Listing containers in this stack===================\
-  && COMPOSE_HTTP_TIMEOUT=400 docker-compose -p ${APP_NAME}${env_id} --verbose -f \$COMPOSE_YML ps\
-  && sleep 5\
-  && echo ====sending app url back to marketplace ====\
-  //&& app_url=\"${env_id}.${APP_ID}.${APP_NAME}.${paas_env}\"\
-  && echo ======interlock logs\
-  && echo ======Logs from the service====\
-  && echo ${app_url}\
-  && echo env is ${env_id}\
-  && echo \"THIS APP IS AVAILABLE HERE: \$app_url \"")
+        sh("BLOCK=hi && echo BLOCK")
+        sh("echo Setting Variables ========\
+        && CERT_PATH=/var/lib/jenkins/bundle\
+        && CA_CERT=\$CERT_PATH/ca.pem\
+        && CLIENT_KEY=\$CERT_PATH/server.key\
+        && CLIENT_CERT=\$CERT_PATH/server.pem\
+        && SWARM_PORT=3376\
+        && DOCKER_HUB=dhe-app-01.east1a.prod\
+        && MARKETPLACE=iae-portal-app.east1a.${paas_env}:3000\
+        && source /var/lib/jenkins/bundle/env.sh\
+        && echo \"==== running docker version to ensure connection to local docker client/server and swarm master and compose version\"\
+        && docker version\
+        && docker-compose --version\
+        && COMPOSE_YML=`pwd`/docker-compose.yml\
+        && echo =========COMPOSE FILE============\
+        && cat \$COMPOSE_YML\
+        && echo ===================================\
+        && echo \"Deploying the application ${APP_NAME} in ${env_id}\"\
+        && echo =============Pulling Images================================\
+        && COMPOSE_HTTP_TIMEOUT=400 docker-compose -p ${APP_NAME}${env_id} --verbose -f \$COMPOSE_YML pull\
+        && echo ==============Deploying Containers=========================\
+        && source /var/lib/jenkins/bundle/env.sh && COMPOSE_HTTP_TIMEOUT=400 docker-compose -p ${APP_NAME}${env_id} --verbose -f \$COMPOSE_YML up -d\
+        && echo ================Listing containers in this stack===================\
+        && COMPOSE_HTTP_TIMEOUT=400 docker-compose -p ${APP_NAME}${env_id} --verbose -f \$COMPOSE_YML ps\
+        && sleep 5\
+        && echo ====sending app url back to marketplace ====\
+        //&& app_url=\"${env_id}.${APP_ID}.${APP_NAME}.${paas_env}\"\
+        && echo ======interlock logs\
+        && echo ======Logs from the service====\
+        && echo ${app_url}\
+        && echo env is ${env_id}\
+        && echo \"THIS APP IS AVAILABLE HERE: \$app_url \"")
         
         // sh """\
         //   ln -s /var/lib/jenkins/bundle/* ./
@@ -529,9 +528,8 @@ def deploy(String env_id, String env_name, String github_url, String org_name, S
         //   echo 'THIS APP IS AVAILABLE HERE: $app_url'
         // """
       }
+      postComment("Your service has been deployed to the **$env_name** Environment. $app_url", github_url)
     }
-
-    postComment("Your service has been deployed to the **$env_name** Environment. $app_url", github_url)
   }
 }
 
