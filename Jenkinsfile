@@ -37,11 +37,10 @@ if (target_branch == null) { //Run tests on push to a feature branch
 
      def testImg = docker.build("srvnonproddocker/$repo-name:test-$short_commit")
       echo "hi i'm here"
-
     
         testImg.inside("-u root"){
           sh "npm install 2>&1 | tee log.txt"
-          String log=readFile('log.txt')
+          log=readFile('log.txt')
          echo "Ran Tests"
         if ("$log" =~ ".*ERR!+.*"){
           echo "Test Failure"
@@ -221,7 +220,7 @@ def build(String env_id, String env_name, String repo_name, String git_sha) {
     
       node() {
         // load the workspace
-        unstash 'workspace'
+        //unstash 'workspace'
 
 
         // get dockerhub credentials
@@ -296,7 +295,7 @@ def push(String env_id, String env_name, String repo_name, String git_sha) {
   stage("Push Docker Image for $env_name") {
     node() {
       // load the workspace
-      unstash 'workspace'
+      //unstash 'workspace'
       // get dockerhub credentials
       docker.withRegistry('http://dockerhub-app-01.east1e.nonprod.dmz/', 'nonprod-dockerhub') {
         def devImg
@@ -353,7 +352,7 @@ def deploy(String env_id, String env_name, String github_url, String org_name, S
   stage("Deploy To $env_name") {
     node() {
       // Get all the files
-      unstash 'workspace'
+      //unstash 'workspace'
 
       print "env_id: $env_id"
       print "repo_name: $repo_name"
