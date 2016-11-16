@@ -97,11 +97,11 @@ if (target_branch == null) { //Run tests on push to a feature branch
       env_id = "Comp"
       env_name = "Component"
 
-      build(env_id, env_name, repo_name, short_commit)
+      build(env_id, env_name, repo_name, git_sha)
       // Post comment on pull request and wait for approval to continue
       askApproval(env_id, env_name, github_url)
       // Create and push docker image to dockerhub
-      push(env_id, env_name, repo_name, short_commit)
+      push(env_id, env_name, repo_name, git_sha)
       // Deploy the image to the environment
       deploy(env_id, env_name, github_url, org_name, repo_name)
 
@@ -113,11 +113,11 @@ if (target_branch == null) { //Run tests on push to a feature branch
       env_name = "Minimum-Capacity"
 
       echo " hi i'm building"
-      build(env_id, env_name, repo_name, short_commit)
+      build(env_id, env_name, repo_name, git_sha)
       // Post comment on pull request and wait for approval to continue
       askApproval(env_id, env_name, github_url)
       // Create and push docker image to dockerhub
-      push(env_id, env_name, repo_name, short_commit)
+      push(env_id, env_name, repo_name, git_sha)
       // Deploy the image to the environment
       deploy(env_id, env_name, github_url, org_name, repo_name)
 
@@ -126,11 +126,11 @@ if (target_branch == null) { //Run tests on push to a feature branch
       env_name = "Production-Like"
 
 
-      build(env_id, env_name, repo_name, short_commit)
+      build(env_id, env_name, repo_name, git_sha)
       // Post comment on pull request and wait for approval to continue
       askApproval(env_id, env_name, github_url)
       // Create and push docker image to dockerhub
-      push(env_id, env_name, repo_name, short_commit)
+      push(env_id, env_name, repo_name, git_sha)
       // Deploy the image to the environment
       deploy(env_id, env_name, github_url, org_name, repo_name)
 
@@ -139,11 +139,11 @@ if (target_branch == null) { //Run tests on push to a feature branch
       env_name = "Production"
 
 
-      build(env_id, env_name, repo_name, short_commit)
+      build(env_id, env_name, repo_name, git_sha)
       // Post comment on pull request and wait for approval to continue
       askApproval(env_id, env_name, github_url)
       // Create and push docker image to dockerhub
-      push(env_id, env_name, repo_name, short_commit)
+      push(env_id, env_name, repo_name, git_sha)
       // Deploy the image to the environment
       deploy(env_id, env_name, github_url, org_name, repo_name)
 
@@ -209,12 +209,16 @@ def askApproval(String env_id, String env_name, String github_url) {
 
 
 //Build image and run CI
-def build(String env_id, String env_name, String repo_name, String short_commit) {
+def build(String env_id, String env_name, String repo_name, String git_sha) {
 
-  stage("Build a Docker Image") {
     node() {
       // load the workspace
       unstash 'workspace'
+
+
+     //shorten the git commit hash to 6 digits for tagging
+      short_commit="$git_sha".take(6)
+
   
       // get dockerhub credentials
       docker.withRegistry('http://dockerhub-app-01.east1e.nonprod.dmz/', 'nonprod-dockerhub') {
@@ -273,12 +277,12 @@ def build(String env_id, String env_name, String repo_name, String short_commit)
 
 
 // Build, tag, and push a docker image for the specified environment
-def push(String env_id, String env_name, String repo_name, String short_commit) {
+def push(String env_id, String env_name, String repo_name, String git_sha) {
   echo "push pls"
   echo "repo: $repo_name"
   echo "env: $env_id"
   // shorten the git commit hash to 6 digits for tagging
-  //short_commit="$git_sha".take(6)
+  short_commit="$git_sha".take(6)
   repo_name = repo_name.toLowerCase();
   env_id = env_id.toLowerCase()
   echo "env is: $env_id"
