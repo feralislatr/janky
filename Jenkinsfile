@@ -279,7 +279,7 @@ def push(String env_id, String env_name, String repo_name, String git_sha) {
   echo "repo: $repo_name"
   echo "env: $env_id"
   // shorten the git commit hash to 6 digits for tagging
-  def short_commit="$git_sha".take(6)
+  short_commit="$git_sha".take(6)
   repo_name = repo_name.toLowerCase();
   env_id = env_id.toLowerCase()
   echo "env is: $env_id"
