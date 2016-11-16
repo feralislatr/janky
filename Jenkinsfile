@@ -102,6 +102,7 @@ if (target_branch == null) { //Run tests on push to a feature branch
       env_name = "Component"
 
       build(env_id, env_name, repo_name, git_sha)
+      ci(env_id, repo_name, git_sha)
       // Post comment on pull request and wait for approval to continue
       askApproval(env_id, env_name, github_url)
       // Create and push docker image to dockerhub
@@ -118,6 +119,7 @@ if (target_branch == null) { //Run tests on push to a feature branch
 
       echo " hi i'm building"
       build(env_id, env_name, repo_name, git_sha)
+      ci(env_id, repo_name, git_sha)
       // Post comment on pull request and wait for approval to continue
       askApproval(env_id, env_name, github_url)
       // Create and push docker image to dockerhub
@@ -129,7 +131,7 @@ if (target_branch == null) { //Run tests on push to a feature branch
       env_id = "ProdLike"
       env_name = "Production-Like"
 
-      //tests need to be run here
+      //ci(env_id, repo_name, git_sha)
       // Post comment on pull request and wait for approval to continue
       askApproval(env_id, env_name, github_url)
       // Create and push docker image to dockerhub
@@ -141,7 +143,7 @@ if (target_branch == null) { //Run tests on push to a feature branch
       env_id = "Prod"
       env_name = "Production"
 
-      //tests need to be run here
+      //ci(env_id, repo_name, git_sha)
       // Post comment on pull request and wait for approval to continue
       askApproval(env_id, env_name, github_url)
       // Create and push docker image to dockerhub
@@ -436,6 +438,9 @@ def deploy(String env_id, String env_name, String github_url, String org_name, S
 
       // get dockerhub credentials
       docker.withRegistry('http://dockerhub-app-01.east1e.nonprod.dmz/', 'nonprod-dockerhub') {
+       //test symlink issues
+        echo "safezone"
+        sh("BLOCK=hi && echo BLOCK")
         sh("echo Setting Variables ========\
         && CERT_PATH=/var/lib/jenkins/bundle\
         && CA_CERT=\$CERT_PATH/ca.pem\
