@@ -30,34 +30,37 @@ if (target_branch == null) { //Run tests on push to a feature branch
     //shorten the git commit hash to 6 digits for tagging
     short_commit="$git_sha".take(6)
 
-    stage('CI Tests') {
-        print "Run Unit Tests"
-      //Define image for running CI tests on push
+    ci(env_id, repo_name, git_sha)
+
+
+    // stage('CI Tests') {
+    //     print "Run Unit Tests"
+    //   //Define image for running CI tests on push
      
 
-     def testImg = docker.build("srvnonproddocker/$repo-name:test-$short_commit")
-      echo "hi i'm here"
+    //  def testImg = docker.build("srvnonproddocker/$repo-name:test-$short_commit")
+    //   echo "hi i'm here"
     
-        testImg.inside("-u root"){
-          sh "npm install 2>&1 | tee log.txt"
-          log=readFile('log.txt')
-         echo "Ran Tests"
-        if ("$log" =~ ".*ERR!+.*"){
-          echo "Test Failure"
-          currentBuild.result = 'FAILURE'
-         } else{
-          echo "Tests Passed"
-         }
-        }
+    //     testImg.inside("-u root"){
+    //       sh "npm install 2>&1 | tee log.txt"
+    //       log=readFile('log.txt')
+    //      echo "Ran Tests"
+    //     if ("$log" =~ ".*ERR!+.*"){
+    //       echo "Test Failure"
+    //       currentBuild.result = 'FAILURE'
+    //      } else{
+    //       echo "Tests Passed"
+    //      }
+    //     }
 
 
         
-    }
+    // }
 
   
   }
 
-  //ci(env_id, repo_name, git_sha)
+  
 
 
 
@@ -69,7 +72,7 @@ if (target_branch == null) { //Run tests on push to a feature branch
       node() {
         //Get current commit from github
         checkout scm
-
+        testMergability(target_branch)
         // get the org, repo, and branch from the job name
         tokens = env.JOB_NAME.tokenize('/')
         org_name = tokens[tokens.size()-3]
@@ -96,8 +99,8 @@ if (target_branch == null) { //Run tests on push to a feature branch
         print("Stashing now")
         stash includes: '*', name: "${env.JOB_BASE_NAME}"
         echo "hi"
-        unstash "${env.JOB_BASE_NAME}"
-        
+       // unstash "${env.JOB_BASE_NAME}"
+
       }
     }
 
@@ -230,9 +233,8 @@ def ci(String env_id, String repo_name, String git_sha){
 short_commit="$git_sha".take(6)
 
  stage('CI Tests') {
-        print "Run Unit Tests"
+      print "Run Unit Tests"
       //Define image for running CI tests on push
-     
 
      def testImg = docker.build("srvnonproddocker/$repo_name:test-$short_commit")
       echo "hi i'm here"
@@ -553,3 +555,14 @@ def mergePR(String url) {
     sh "curl -X PUT -d '{\"commit_message\": \"Pull Request merged by Jenkins\"}' https://$USERNAME:$PASSWORD@$url/pulls/$pull_id/merge"
   }
 }
+
+def testMergability(String target_branch) {
+ stage 'Test Mergeability'
+  try {
+     sh "git branch -D temp"
+      } catch (err) {}
+      sh "git checkout -b temp"
+      sh "git checkout $target_branch"
+      sh "git merge --no-ff temp"
+  }
+
