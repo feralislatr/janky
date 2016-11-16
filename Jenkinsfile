@@ -95,7 +95,9 @@ if (target_branch == null) { //Run tests on push to a feature branch
 
         print("Stashing now")
         stash includes: '*', name: "${env.JOB_BASE_NAME}"
+        echo "hi"
         unstash "${env.JOB_BASE_NAME}"
+        
       }
     }
 
