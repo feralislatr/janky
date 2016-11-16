@@ -212,33 +212,33 @@ def askApproval(String env_id, String env_name, String github_url) {
 }
 
 
-//Run CI Tests
-def ci(String env_id, String repo_name, String git_sha){
+// //Run CI Tests
+// def ci(String env_id, String repo_name, String git_sha){
 
-//shorten the git commit hash to 6 digits for tagging
-short_commit="$git_sha".take(6)
+// //shorten the git commit hash to 6 digits for tagging
+// short_commit="$git_sha".take(6)
 
- stage('CI Tests') {
-        print "Run Unit Tests"
-      //Define image for running CI tests on push
+//  stage('CI Tests') {
+//         print "Run Unit Tests"
+//       //Define image for running CI tests on push
      
 
-     def testImg = docker.build("srvnonproddocker/$repo_name:test-$short_commit")
-      echo "hi i'm here"
+//      def testImg = docker.build("srvnonproddocker/$repo_name:test-$short_commit")
+//       echo "hi i'm here"
     
-        testImg.inside("-u root"){
-          sh "npm install 2>&1 | tee log.txt"
-          log=readFile('log.txt')
-         echo "Ran Tests"
-        if ("$log" =~ ".*ERR!+.*"){
-          echo "Test Failure"
-          currentBuild.result = 'FAILURE'
-         } else{
-          echo "Tests Passed"
-         }
-        }
-    }
-}
+//         testImg.inside("-u root"){
+//           sh "npm install 2>&1 | tee log.txt"
+//           log=readFile('log.txt')
+//          echo "Ran Tests"
+//         if ("$log" =~ ".*ERR!+.*"){
+//           echo "Test Failure"
+//           currentBuild.result = 'FAILURE'
+//          } else{
+//           echo "Tests Passed"
+//          }
+//         }
+//     }
+// }
 
 
 //Build image and run CI
