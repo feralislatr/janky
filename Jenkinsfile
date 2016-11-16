@@ -99,7 +99,7 @@ if (target_branch == null) { //Run tests on push to a feature branch
         print("Stashing now")
         stash includes: '*', name: "${env.JOB_BASE_NAME}"
         echo "hi"
-       // unstash "${env.JOB_BASE_NAME}"
+        unstash "${env.JOB_BASE_NAME}"
 
       }
     }
@@ -322,7 +322,8 @@ def push(String env_id, String env_name, String repo_name, String git_sha) {
   stage("Push Docker Image for $env_name") {
     node() {
       // load the workspace
-      ////unstash 'workspace'
+      /// Get all the files
+      unstash "${env.JOB_BASE_NAME}"
       // get dockerhub credentials
       docker.withRegistry('http://dockerhub-app-01.east1e.nonprod.dmz/', 'nonprod-dockerhub') {
         def devImg
