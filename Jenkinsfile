@@ -30,26 +30,26 @@ if (target_branch == null) { //Run tests on push to a feature branch
     //shorten the git commit hash to 6 digits for tagging
     short_commit="$git_sha".take(6)
 
-    // stage('CI Tests') {
-    //     print "Run Unit Tests"
-    //   //Define image for running CI tests on push
+    stage('CI Tests') {
+        print "Run Unit Tests"
+      //Define image for running CI tests on push
      
 
-    //  def testImg = docker.build("srvnonproddocker/$repo-name:test-$short_commit")
-    //   echo "hi i'm here"
+     def testImg = docker.build("srvnonproddocker/$repo-name:test-$short_commit")
+      echo "hi i'm here"
     
-    //     testImg.inside("-u root"){
-    //       sh "npm install 2>&1 | tee log.txt"
-    //       log=readFile('log.txt')
-    //      echo "Ran Tests"
-    //     if ("$log" =~ ".*ERR!+.*"){
-    //       echo "Test Failure"
-    //       currentBuild.result = 'FAILURE'
-    //      } else{
-    //       echo "Tests Passed"
-    //      }
-    //     }
-    // }
+        testImg.inside("-u root"){
+          sh "npm install 2>&1 | tee log.txt"
+          log=readFile('log.txt')
+         echo "Ran Tests"
+        if ("$log" =~ ".*ERR!+.*"){
+          echo "Test Failure"
+          currentBuild.result = 'FAILURE'
+         } else{
+          echo "Tests Passed"
+         }
+        }
+    }
 
   }
 
@@ -102,7 +102,7 @@ if (target_branch == null) { //Run tests on push to a feature branch
       env_name = "Component"
 
       build(env_id, env_name, repo_name, git_sha)
-      //ci(env_id, repo_name, git_sha)
+      ci(env_id, repo_name, git_sha)
       // Post comment on pull request and wait for approval to continue
       askApproval(env_id, env_name, github_url)
       // Create and push docker image to dockerhub
@@ -119,7 +119,7 @@ if (target_branch == null) { //Run tests on push to a feature branch
 
       echo " hi i'm building"
       build(env_id, env_name, repo_name, git_sha)
-     // ci(env_id, repo_name, git_sha)
+      ci(env_id, repo_name, git_sha)
       // Post comment on pull request and wait for approval to continue
       askApproval(env_id, env_name, github_url)
       // Create and push docker image to dockerhub
@@ -131,7 +131,7 @@ if (target_branch == null) { //Run tests on push to a feature branch
       env_id = "ProdLike"
       env_name = "Production-Like"
 
-      //ci(env_id, repo_name, git_sha)
+      ci(env_id, repo_name, git_sha)
       // Post comment on pull request and wait for approval to continue
       askApproval(env_id, env_name, github_url)
       // Create and push docker image to dockerhub
@@ -212,33 +212,33 @@ def askApproval(String env_id, String env_name, String github_url) {
 }
 
 
-// //Run CI Tests
-// def ci(String env_id, String repo_name, String git_sha){
+//Run CI Tests
+def ci(String env_id, String repo_name, String git_sha){
 
-// //shorten the git commit hash to 6 digits for tagging
-// short_commit="$git_sha".take(6)
+//shorten the git commit hash to 6 digits for tagging
+short_commit="$git_sha".take(6)
 
-//  stage('CI Tests') {
-//         print "Run Unit Tests"
-//       //Define image for running CI tests on push
+ stage('CI Tests') {
+        print "Run Unit Tests"
+      //Define image for running CI tests on push
      
 
-//      def testImg = docker.build("srvnonproddocker/$repo_name:test-$short_commit")
-//       echo "hi i'm here"
+     def testImg = docker.build("srvnonproddocker/$repo_name:test-$short_commit")
+      echo "hi i'm here"
     
-//         testImg.inside("-u root"){
-//           sh "npm install 2>&1 | tee log.txt"
-//           log=readFile('log.txt')
-//          echo "Ran Tests"
-//         if ("$log" =~ ".*ERR!+.*"){
-//           echo "Test Failure"
-//           currentBuild.result = 'FAILURE'
-//          } else{
-//           echo "Tests Passed"
-//          }
-//         }
-//     }
-// }
+        testImg.inside("-u root"){
+          sh "npm install 2>&1 | tee log.txt"
+          log=readFile('log.txt')
+         echo "Ran Tests"
+        if ("$log" =~ ".*ERR!+.*"){
+          echo "Test Failure"
+          currentBuild.result = 'FAILURE'
+         } else{
+          echo "Tests Passed"
+         }
+        }
+    }
+}
 
 
 //Build image and run CI
@@ -274,38 +274,39 @@ def build(String env_id, String env_name, String repo_name, String git_sha) {
               //build and push image
               testImg = docker.build("srvnonproddocker/$repo_name:base")
               testImg.tag("$env_id-$short_commit")
-              //tag = "$env_id-$short_commit"
-              echo "minc images build"
-              sh "docker images | grep ${short_commit}"
+              
+              sh "docker images | grep $env_id-$short_commit"
+              echo "$env_id images built"
               break
 
             case ["prodlike", "prod"]:
               //use previously pushed image
               testImg = docker.image("srvnonproddocker/$repo_name:base")
               testImg.tag("$env_id-$short_commit")
-              //tag = "$env_id-$short_commit"
+              sh "docker images | grep $env_id-$short_commit"
+              echo "$env_id images built"
 
               break
           }
 
-                // stage('CI Tests') {
-                //   print "Run Unit Tests"
-                //   //testImg is null here
+                stage('CI Tests') {
+                  print "Run Unit Tests"
+                  //testImg is null here
                   
-                //  testImg = docker.image("srvnonproddocker/$repo_name:$env_id-$short_commit")
-                //  echo "hi testimg is not null"
-                //   testImg.inside("-u root"){
-                //       sh "npm install 2>&1 | tee log.txt"
-                //     log=readFile('log.txt')
-                //     echo "Ran Tests"
-                //     if ("$log" =~ ".*ERR!+.*"){
-                //       echo "Test Failure"
-                //       currentBuild.result = 'FAILURE'
-                //     } else{
-                //       echo "Tests Passed"
-                //     }
-                //   }
-                // }
+                 testImg = docker.image("srvnonproddocker/$repo_name:$env_id-$short_commit")
+                 echo "hi testimg is not null"
+                  testImg.inside("-u root"){
+                      sh "npm install 2>&1 | tee log.txt"
+                    log=readFile('log.txt')
+                    echo "Ran Tests"
+                    if ("$log" =~ ".*ERR!+.*"){
+                      echo "Test Failure"
+                      currentBuild.result = 'FAILURE'
+                    } else{
+                      echo "Tests Passed"
+                    }
+                  }
+                }
       }
   }
 }
@@ -342,20 +343,23 @@ def push(String env_id, String env_name, String repo_name, String git_sha) {
           case "minc":
             //build and push image
            masterImg = docker.image("srvnonproddocker/$repo_name:$env_id-$short_commit")
-            //masterImg.tag("$env_id-$short_commit")
-           echo "minc images before"
-           sh "docker images | grep $short_commit"
-            masterImg.push("$env_id-$short_commit")
-            echo "minc images after"
-            sh "docker images | grep $short_commit"
+           echo "$env_id images before"
+           sh "docker images | grep $env_id-$short_commit"
+           masterImg.push("$env_id-$short_commit")
+           echo "$env_id images after"
+           sh "docker images | grep $env_id-$short_commit"
 
             break
 
           case ["prodlike", "prod"]:
             //use previously pushed image
             masterImg = docker.image("srvnonproddocker/$repo_name:$env_id-$short_commit")
-           // masterImg.tag("$env_id-$short_commit")
+           	echo "$env_id images before"
+           	sh "docker images | grep $env_id-$short_commit"
             masterImg.push("$env_id-$short_commit")
+            echo "$env_id images after"
+            sh "docker images | grep $env_id-$short_commit"
+
             break
         }
       }
