@@ -381,6 +381,8 @@ def deploy(String env_id, String env_name, String github_url, String org_name, S
       sh("curl -o docker-compose.yml ${marketplace_url}/${marketplace_path}?${marketplace_args}")
       //sh("curl -o docker-compose.yml $marketplace_url/$marketplace_path?$marketplace_args")
       sh("curl -o docker-config.json ${marketplace_url}/${marketplace_path}/config?${marketplace_args}")
+      sh "cat docker-compose.yml"
+
       def APP_ID = sh (
             script: "cat docker-config.json | python -c \"import sys, json; print json.load(sys.stdin)[\'app_id\']\"",
             returnStdout: true
