@@ -273,7 +273,7 @@ def build(String env_id, String env_name, String repo_name, String git_sha) {
       }
     }
   }
-}
+
 
 
 // Build, tag, and push a docker image for the specified environment
