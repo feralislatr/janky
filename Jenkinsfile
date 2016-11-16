@@ -49,6 +49,11 @@ if (target_branch == null) { //Run tests on push to a feature branch
           echo "Tests Passed"
          }
         }
+
+
+        print("Stashing now")
+        stash includes: '*', name: "${env.JOB_BASE_NAME}"
+        unstash "${env.JOB_BASE_NAME}"
     }
 
   }
@@ -113,6 +118,8 @@ if (target_branch == null) { //Run tests on push to a feature branch
     //If pull request is to the master branch, deploy to minc, prodlike, or prod
     } else if (target_branch == 'master') {
 
+        print('unstash')
+          unstash "${env.JOB_BASE_NAME}"
       // DEPLOY MINIMUM-CAPACITY ENVIRONMENT
       env_id = "Minc"
       env_name = "Minimum-Capacity"
@@ -358,6 +365,7 @@ def push(String env_id, String env_name, String repo_name, String git_sha) {
 //Deploy application
 def deploy(String env_id, String env_name, String github_url, String org_name, String repo_name) {
 
+
   env_id = env_id.toLowerCase()
   def marketplace_url="http://marketplace-app-03.east1a.dev:3000"
   def marketplace_path="api/paas/docker/compose"
@@ -372,9 +380,9 @@ def deploy(String env_id, String env_name, String github_url, String org_name, S
 
   stage("Deploy To $env_name") {
     node() {
-      // Get all the files
-      ////unstash 'workspace'
-
+     // Get all the files
+      unstash "${env.JOB_BASE_NAME}"
+      
       print "env_id: $env_id"
       print "repo_name: $repo_name"
       print "marketplace_url: $marketplace_url"
