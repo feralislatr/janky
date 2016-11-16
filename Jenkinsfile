@@ -119,8 +119,6 @@ if (target_branch == null) { //Run tests on push to a feature branch
     //If pull request is to the master branch, deploy to minc, prodlike, or prod
     } else if (target_branch == 'master') {
 
-        print('unstash')
-          unstash "${env.JOB_BASE_NAME}"
       // DEPLOY MINIMUM-CAPACITY ENVIRONMENT
       env_id = "Minc"
       env_name = "Minimum-Capacity"
@@ -264,8 +262,8 @@ def build(String env_id, String env_name, String repo_name, String git_sha) {
     stage("Build a Docker Image") {
     
       node() {
-        // load the workspace
-        ////unstash 'workspace'
+          print('unstash')
+          unstash "${env.JOB_BASE_NAME}"
 
 
         // get dockerhub credentials
