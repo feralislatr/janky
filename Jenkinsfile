@@ -27,41 +27,10 @@ if (target_branch == null) { //Run tests on push to a feature branch
           returnStdout: true
         ).trim()
         
-    //shorten the git commit hash to 6 digits for tagging
-    short_commit="$git_sha".take(6)
 
-    ci(env_id, repo_name, git_sha)
+    build("none", repo_name, git_sha)
 
-
-    // stage('CI Tests') {
-    //     print "Run Unit Tests"
-    //   //Define image for running CI tests on push
-     
-
-    //  def testImg = docker.build("srvnonproddocker/$repo-name:test-$short_commit")
-    //   echo "hi i'm here"
-    
-    //     testImg.inside("-u root"){
-    //       sh "npm install 2>&1 | tee log.txt"
-    //       log=readFile('log.txt')
-    //      echo "Ran Tests"
-    //     if ("$log" =~ ".*ERR!+.*"){
-    //       echo "Test Failure"
-    //       currentBuild.result = 'FAILURE'
-    //      } else{
-    //       echo "Tests Passed"
-    //      }
-    //     }
-
-
-        
-    // }
-
-  
   }
-
-  
-
 
 
 } else {
@@ -70,16 +39,17 @@ if (target_branch == null) { //Run tests on push to a feature branch
   try { 
     stage('Initialize environment') {
       node() {
+        
         //Get current commit from github
         checkout scm
         testMergability(target_branch)
-        // get the org, repo, and branch from the job name
-        tokens = env.JOB_NAME.tokenize('/')
-        org_name = tokens[tokens.size()-3]
-        repo_name = tokens[tokens.size()-2]
-        branch_name = tokens[tokens.size()-1]
-    
- 
+        
+        // Take off the https, then remove the path to just leave the bare domain
+        tokens = env.CHANGE_URL.tokenize('/')
+        github_domain = tokens[1]
+        org_name = tokens[2]
+        repo_name = tokens[3]
+        branch_name = env.BRANCH_NAME
 
         // Take off the https, then remove the path to just leave the bare domain
         github_domain = env.CHANGE_URL.replace("https://", "").tokenize('/')[0]
@@ -98,7 +68,6 @@ if (target_branch == null) { //Run tests on push to a feature branch
 
         print("Stashing now")
         stash includes: '*', name: "${env.JOB_BASE_NAME}"
-        echo "hi"
         unstash "${env.JOB_BASE_NAME}"
 
       }
@@ -112,8 +81,7 @@ if (target_branch == null) { //Run tests on push to a feature branch
       env_id = "Comp"
       env_name = "Component"
 
-      build(env_id, env_name, repo_name, git_sha)
-      ci(env_id, repo_name, git_sha)
+      build(env_id, repo_name, git_sha)
       // Post comment on pull request and wait for approval to continue
       askApproval(env_id, env_name, github_url)
       // Create and push docker image to dockerhub
@@ -122,15 +90,13 @@ if (target_branch == null) { //Run tests on push to a feature branch
       deploy(env_id, env_name, github_url, org_name, repo_name)
 
     //If pull request is to the master branch, deploy to minc, prodlike, or prod
-    } else if (target_branch == 'master') {
+    } else if (target_branch == 'master' || 'master2') {
 
       // DEPLOY MINIMUM-CAPACITY ENVIRONMENT
       env_id = "Minc"
       env_name = "Minimum-Capacity"
 
-      echo " hi i'm building"
-      build(env_id, env_name, repo_name, git_sha)
-      ci(env_id, repo_name, git_sha)
+      build(env_id, repo_name, git_sha)
       // Post comment on pull request and wait for approval to continue
       askApproval(env_id, env_name, github_url)
       // Create and push docker image to dockerhub
@@ -141,10 +107,7 @@ if (target_branch == null) { //Run tests on push to a feature branch
       // DEPLOY PROD-LIKE ENVIRONMENT
       env_id = "ProdLike"
       env_name = "Production-Like"
-
-
-      build(env_id, env_name, repo_name, git_sha)
-      //ci(env_id, repo_name, git_sha)
+      
       // Post comment on pull request and wait for approval to continue
       askApproval(env_id, env_name, github_url)
       // Create and push docker image to dockerhub
@@ -156,8 +119,6 @@ if (target_branch == null) { //Run tests on push to a feature branch
       env_id = "Prod"
       env_name = "Production"
 
-      build(env_id, env_name, repo_name, git_sha)
-      //ci(env_id, repo_name, git_sha)
       // Post comment on pull request and wait for approval to continue
       askApproval(env_id, env_name, github_url)
       // Create and push docker image to dockerhub
@@ -168,7 +129,6 @@ if (target_branch == null) { //Run tests on push to a feature branch
     }
     stage('Merge Pull Request') {
       node() {
-        //This needs to become dynamic
         mergePR(github_url)
       }
     }
@@ -209,7 +169,7 @@ def askApproval(String env_id, String env_name, String github_url) {
   // markup link to tell lambda to abort the build
   def abort_button = "[![abort]($s3_url/abort.jpg)]($lambda_url&action=abort)"
   // markup link to tell lambda to continue the build
-  def continue_button = "[![continue]($s3_url/continue.jpg)]($lambda_url&action=continue)"
+  def continue_button = "[![continue]($s3_url/continue.png)]($lambda_url&action=continue)"
 
   // comment to post to GitHib
   def body = "$message <br >$abort_button $continue_button"
@@ -227,82 +187,37 @@ def askApproval(String env_id, String env_name, String github_url) {
 
 
 //Run CI Tests
-def ci(String env_id, String repo_name, String git_sha){
+def build(String env_id, String repo_name, String git_sha){
 
-//shorten the git commit hash to 6 digits for tagging
-short_commit="$git_sha".take(6)
+  node() {
+  //shorten the git commit hash to 6 digits for tagging
+  short_commit="$git_sha".take(6)
+  env_id = env_id.toLowerCase()
+  unstash "${env.JOB_BASE_NAME}"
+  def testImg
 
- stage('CI Tests') {
-      print "Run Unit Tests"
-      //Define image for running CI tests on push
+    stage('Build Image') {
+    	//Define image for running CI tests
+        testImg = docker.build("srvnonproddocker/$repo_name:$env_id-$short_commit")
+        sh "docker images | grep $env_id-$short_commit"
+    }
 
-     def testImg = docker.build("srvnonproddocker/$repo_name:test-$short_commit")
-      echo "hi i'm here"
+    //Run unit tests - maybe make into a function
+    stage('Unit Tests') {
     
+    	print "Run Unit Tests"
         testImg.inside("-u root"){
           sh "npm install 2>&1 | tee log.txt"
           log=readFile('log.txt')
-         echo "Ran Tests"
-        if ("$log" =~ ".*ERR!+.*"){
-          echo "Test Failure"
-          currentBuild.result = 'FAILURE'
-         } else{
-          echo "Tests Passed"
-         }
+          echo "Ran Tests"
+          if ("$log" =~ ".*ERR!+.*"){
+            echo "Test Failure"
+            currentBuild.result = 'FAILURE'
+          } else{
+            echo "Tests Passed"
+          }
         }
     }
-}
-
-
-//Build image and run CI
-def build(String env_id, String env_name, String repo_name, String git_sha) {
-    echo "build pls"
-
-    // shorten the git commit hash to 6 digits for tagging
-    short_commit="$git_sha".take(6)
-    repo_name = repo_name.toLowerCase();
-    env_id = env_id.toLowerCase()
-    echo "env is: $env_id"
-    stage("Build a Docker Image") {
-    
-      node() {
-          print('unstash')
-          unstash "${env.JOB_BASE_NAME}"
-
-
-        // get dockerhub credentials
-          def testImg
-          //String tag
-          // We want to do different things based on what environment we are in
-          switch (env_id) {
-            case "comp":
-
-              //build and push image
-              testImg = docker.build("srvnonproddocker/$repo_name:$env_id-$short_commit")
-              //tag = "$env_id-$short_commit"
-
-              break
-
-            case "minc":
-              //build and push image
-              testImg = docker.build("srvnonproddocker/$repo_name:base")
-              testImg.tag("$env_id-$short_commit")
-              
-              sh "docker images | grep $env_id-$short_commit"
-              echo "$env_id images built"
-              break
-
-            case ["prodlike", "prod"]:
-              //use previously pushed image
-              testImg = docker.image("srvnonproddocker/$repo_name:base")
-              testImg.tag("$env_id-$short_commit")
-              sh "docker images | grep $env_id-$short_commit"
-              echo "$env_id images built"
-
-              break
-          }
-
-      }
   }
 }
 
@@ -324,40 +239,64 @@ def push(String env_id, String env_name, String repo_name, String git_sha) {
       // load the workspace
       /// Get all the files
       unstash "${env.JOB_BASE_NAME}"
-      // get dockerhub credentials
-      docker.withRegistry('http://dockerhub-app-01.east1e.nonprod.dmz/', 'nonprod-dockerhub') {
-        def devImg
-        def masterImg
-        // We want to do different things based on what environment we are in
-        switch (env_id) {
-          case "comp":
-            //build and push image
-            devImg = docker.image("srvnonproddocker/$repo_name:$env_id-$short_commit")
-            devImg.push("$env_id-$short_commit")
-            break
+      
+      def devImg
+      def masterImg
+      // We want to do different things based on what environment we are in
+      switch (env_id) {
+        case "comp":
+          //build and push image
+          devImg = docker.image("srvnonproddocker/$repo_name:$env_id-$short_commit")
+          devImg.push("$env_id-$short_commit")
+          break
 
-          case "minc":
-            //build and push image
-           masterImg = docker.image("srvnonproddocker/$repo_name:$env_id-$short_commit")
-           echo "$env_id images before"
-           sh "docker images | grep $env_id-$short_commit"
-           masterImg.push("$env_id-$short_commit")
-           echo "$env_id images after"
-           sh "docker images | grep $env_id-$short_commit"
+        case "minc":
+          //build and push image
+         masterImg = docker.image("srvnonproddocker/$repo_name:$env_id-$short_commit")
+         echo "Environment is $env_id"
+         echo masterImg.id
+         sh "docker images | grep $env_id-$short_commit"
+         masterImg.tag("$env_id-$short_commit")
+         
+         // push with dockerhub credentials
+         docker.withRegistry('http://dockerhub-app-01.east1e.nonprod.dmz/', 'nonprod-dockerhub') {
+          masterImg.push()
+         }
+         break
 
-            break
-
-          case ["prodlike", "prod"]:
-            //use previously pushed image
-            masterImg = docker.image("srvnonproddocker/$repo_name:$env_id-$short_commit")
-           	echo "$env_id images before"
-           	sh "docker images | grep $env_id-$short_commit"
-            masterImg.push("$env_id-$short_commit")
-            echo "$env_id images after"
-            sh "docker images | grep $env_id-$short_commit"
-
-            break
-        }
+        case "prodlike":
+          //use previously pushed image
+          masterImg = docker.image("srvnonproddocker/$repo_name:minc-$short_commit")
+         	echo "Environment is $env_id"
+         	echo masterImg.id
+         	masterImg.tag("$env_id-$short_commit")
+         	sh "docker images | grep $env_id-$short_commit"
+         	
+         	// push with dockerhub credentials
+          docker.withRegistry('http://dockerhub-app-01.east1e.nonprod.dmz/', 'nonprod-dockerhub') {
+            masterImg.push()
+          }
+          echo "$env_id images after"
+          sh "docker images | grep $env_id-$short_commit"
+          break
+          
+        case "prod":
+          //use previously pushed image
+          masterImg = docker.image("srvnonproddocker/$repo_name:prodlike-$short_commit")
+         	echo "$env_id images before"
+         	echo "Environment is $env_id"
+         	echo masterImg.id
+         	masterImg.tag("$env_id-$short_commit")
+         	sh "docker images | grep $env_id-$short_commit"
+          
+         	// push with dockerhub credentials
+          docker.withRegistry('http://dockerhub-app-01.east1e.nonprod.dmz/', 'nonprod-dockerhub') {
+            masterImg.push()
+          }
+          echo "$env_id images after"
+          sh "docker images | grep $env_id-$short_commit"
+          break
+          
       }
     	echo "$repo_name:$env_id-$short_commit just pushed"
     }
@@ -374,13 +313,8 @@ def deploy(String env_id, String env_name, String github_url, String org_name, S
   def marketplace_url="http://marketplace-app-03.east1a.dev:3000"
   def marketplace_path="api/paas/docker/compose"
   
-  def marketplace_args
+  def marketplace_args="app_env=${env_id}\\&repo_name=reza-pipeline/blueocean-ui-service" //must hardcode for now
   //def marketplace_args="app_env=$env_id\\&repo_name=$org_name/$repo_name"
-  if(env_id == "prod") {
-    marketplace_args="app_env=master\\&repo_name=reza-pipeline/blueocean-ui-service" //must hardcode for now
-  } else {
-    marketplace_args="app_env=${env_id}\\&repo_name=reza-pipeline/blueocean-ui-service" //must hardcode for now
-  }
 
   stage("Deploy To $env_name") {
     node() {
@@ -566,4 +500,3 @@ def testMergability(String target_branch) {
       sh "git checkout $target_branch"
       sh "git merge --no-ff temp"
   }
-
