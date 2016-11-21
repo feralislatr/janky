@@ -10,7 +10,7 @@
     },
     "license": "MIT",
     "scripts": {
-        "start": "node food.js"
+        "start": "node food.js",
         "test": "node test.js"
     },
     "dependencies": {
