@@ -34,9 +34,9 @@ module.exports= {
     });
   //});
 
-  } //app.get
+  }); //app.get
 
-  app.post: function(/food, function (req, res){
+  app.post: function('/food', function (req, res){
     //app.post('/food', function (req, res) {
     console.log('Creaing a new food');
     var client = new pg.Client();
@@ -60,7 +60,7 @@ module.exports= {
       })
     //});
 
-  } //app.post
+  }); //app.post
 
 }//module.exports
 
