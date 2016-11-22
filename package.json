@@ -10,8 +10,8 @@
     },
     "license": "MIT",
     "scripts": {
-        "start": "node food.js",
-        "test": "node test.js"
+        "start": "node food.js"//,
+        //"test": "node test.js"
     },
     "dependencies": {
         "express": "^4.13.3",
