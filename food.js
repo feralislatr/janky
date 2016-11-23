@@ -8,8 +8,10 @@ const app = express();
 const sys = require('sys')
 const exec = require('child_process').exec;
 
+var get = app.get();
+var post = app.post();
 module.exports= {
-  app.get: function('/food', function (req, res){
+  get: function('/food', function (req, res){
     //app.get('/food', function (req, res) {
     
     console.log("In the food");
@@ -36,7 +38,7 @@ module.exports= {
 
   }); //app.get
 
-  app.post: function('/food', function (req, res){
+  post: function('/food', function (req, res){
     //app.post('/food', function (req, res) {
     console.log('Creaing a new food');
     var client = new pg.Client();
