@@ -2,10 +2,11 @@
 var assert = require('assert');
 var sinon = require('sinon');
 var PassThrough = require('stream').PassThrough;
+//var PassThrough = require('passthrough');
 var http = require('http');
 
 
-var api = require('food.js');
+var api = require('./food');
 
 describe('api', function() {
 	beforeEach(function() {
@@ -16,7 +17,7 @@ describe('api', function() {
 		http.request.restore();
 	});
  
-  //Test GET request
+  	//Test GET request
 	it('should convert get result to object', function(done) {
   	var expected = { hello: 'world' };
   	var response = new PassThrough();
@@ -69,4 +70,4 @@ describe('api', function() {
   
 });
 
-res.status(200).json(result.rows);
+//res.status(200).json(result.rows);
