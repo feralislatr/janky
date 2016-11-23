@@ -6,15 +6,20 @@
     "main": "food.js",
     "repository": {
       "type": "git",
-      "url": "git@csp-github.micropaas.io:BAH-GSA-IAE/food-node-service.git"
+      "url": "git@csp-github.micropaas.io:Pipeline/nodejs-food-service.git"
     },
     "license": "MIT",
     "scripts": {
-        "start": "node food.js"
+        "start": "node food.js",
+        "test": "sinon test.js"
     },
     "dependencies": {
         "express": "^4.13.3",
         "pg": "^4.3.0",
-        "node-pg-migrate": "^0.0.10"
+        "node-pg-migrate": "^0.0.10",
+        "passthrough": "^0.6.0",
+        "sinon": "^1.17.6",
+        "mocha": "^3.1.2"
+        
     }
 }
