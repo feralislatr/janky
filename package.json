@@ -11,7 +11,7 @@
     "license": "MIT",
     "scripts": {
         "start": "node food.js",
-        "test": "sinon test.js"
+        "test": "mocha test.js"
     },
     "dependencies": {
         "express": "^4.13.3",
