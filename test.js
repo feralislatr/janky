@@ -2,7 +2,7 @@
 
 var test = require('tape');
 var request = require('supertest');
-var app = require('food.js');
+var app = require('./food');
 ///
 var sinon = require('sinon');
 var mock;
