@@ -13,19 +13,19 @@ mock = sinon.mock(require('./food'));
 
 
 
-test('Correct result returned', function (t) {
-  request(mock) //app
-    .get('./food')
-    //.expect('Content-Type', /json/)
-    .expect(200)
-    .end(function (err, res) {
-      var expectedResponse = 200;
+// test('Correct result returned', function (t) {
+//   request(mock) //app
+//     .get('./food')
+//     //.expect('Content-Type', /json/)
+//     .expect(200)
+//     .end(function (err, res) {
+//       var expectedResponse = 200;
 
-      t.error(err, 'No error');
-      t.same(res.body, expectedResponse, 'Everything works');
-      t.end();
-    });
-});
+//       t.error(err, 'No error');
+//       t.same(res.body, expectedResponse, 'Everything works');
+//       t.end();
+//     });
+// });
 
 mock.verify()
 mock.restore()
