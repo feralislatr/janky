@@ -69,4 +69,4 @@ app.listen(PORT);
 console.log('Running a server on port: ' + PORT);
 
 //expose app for testing
-exports = module.exports = app;
+module.exports = app;

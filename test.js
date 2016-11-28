@@ -41,7 +41,7 @@ mock = sinon.mock(app);
 console.log("i'm ok");
 test('GET /food', function (assert) {
 	console.log("still ok");
-  request(mock)
+  request(mock) //maybe mock.app?
     .get('/food')
     .expect(200)
     .expect('Content-Type', /json/)
