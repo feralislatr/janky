@@ -26,9 +26,9 @@ test('Correct result returned', function (t) {
       t.error(err, 'No error');
       t.same(res.body, expectedResponse, 'Everything works');
       t.end();
-      mock.verify()
+     
     });
 });
 
-
+mock.verify()
 mock.restore()
