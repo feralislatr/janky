@@ -38,13 +38,16 @@ mock = sinon.mock(app);
 
 
 //second attempt get test
+console.log("i'm ok");
 test('GET /food', function (assert) {
+	console.log("still ok");
   request(app)
     .get('/food')
     .expect(200)
     .expect('Content-Type', /json/)
     .end(function (err, res) {
       var expectedThings = [
+      {food: "", name: "", author: "", rating: ""}
       ];
       var actualThings = res.body;
  
