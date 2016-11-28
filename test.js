@@ -13,7 +13,12 @@ mock = sinon.mock(require('./food'));
 //mock.expects('query').with(queryString, queryParams).yields(null, rows);
 
 
-
+//var request = require('request');
+request(mock, function (error, response, body) {
+  if (!error && response.statusCode == 200) {
+    console.log("hi this work") // Print the web page.
+  }
+})
 
 // test('Correct result returned', function (t) {
 //   request(mock) //app
