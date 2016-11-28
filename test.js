@@ -7,7 +7,7 @@ var request = require('supertest');
 var sinon = require('sinon');
 var mock;
 
-mock = sinon.mock(require('./food'));
+mock = sinon.mock(require('/food'));
 //mock.expects('query').with(queryString, queryParams).yields(null, rows);
 ///
 
