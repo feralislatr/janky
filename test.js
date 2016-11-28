@@ -41,7 +41,7 @@ mock = sinon.mock(app);
 console.log("i'm ok");
 test('GET /food', function (assert) {
 	console.log("still ok");
-  request(app)
+  request(mock)
     .get('/food')
     .expect(200)
     .expect('Content-Type', /json/)
@@ -56,6 +56,8 @@ test('GET /food', function (assert) {
       assert.end();
     });
 });
+
+//actually gets 404 and returns "There has been an error connecting to the database"
 
 mock.verify()
 mock.restore()
