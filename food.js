@@ -53,6 +53,9 @@ app.post('/food', function (req, res) {
   })
 });
 
+app.address(){
+  return null;
+}
 
 var child = exec("./node_modules/.bin/pg-migrate up", function (error, stdout, stderr) {
   sys.print('stdout: ' + stdout);
