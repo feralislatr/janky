@@ -8,7 +8,6 @@ const sys = require('sys')
 const exec = require('child_process').exec;
 
 app.get('/food', function (req, res) {
-  
   console.log("In the food");
   var client = new pg.Client();
   client.connect(function (err) {
@@ -54,6 +53,7 @@ app.post('/food', function (req, res) {
   })
 });
 
+
 var child = exec("./node_modules/.bin/pg-migrate up", function (error, stdout, stderr) {
   sys.print('stdout: ' + stdout);
   sys.print('stderr: ' + stderr);
@@ -64,3 +64,6 @@ var child = exec("./node_modules/.bin/pg-migrate up", function (error, stdout, s
 
 app.listen(PORT);
 console.log('Running a server on port: ' + PORT);
+
+//expose app for testing
+exports = module.exports = app;
