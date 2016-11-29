@@ -9,7 +9,7 @@ var mock = sinon.mock(app);
 
 var queryString = 'SELECT * FROM food'
 var queryParams = ""
-mock.expects('get').withArgs(queryString, queryParams).yields(null, rows);
+mock.expects('get').withArgs(queryString, queryParams).yields(null, "");
 
 
 //var request = require('request');
