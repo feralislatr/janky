@@ -5,11 +5,15 @@ var request = require('supertest');
 var app = require('./food');
 ///
 var sinon = require('sinon');
-var mock = sinon.mock(app);
+var db = sinon.mock(app);
 
 var queryString = 'SELECT * FROM food'
 var queryParams = ""
-mock.expects('get').withArgs(queryString, queryParams).yields(null, "");
+//db.expects('get').withArgs(queryString, queryParams).yields(null, "");
+
+//sinon.stub(db.query, "get");
+db.expects('get');
+
 
 
 //var request = require('request');
@@ -21,7 +25,7 @@ mock.expects('get').withArgs(queryString, queryParams).yields(null, "");
 
 //first attempt get test
 // test('Get food', function (assert) {
-//   request(mock) //app
+//   request(db) //app
 //     .get('/food')
 //     //.expect('Content-Type', /json/)
 //     .expect(200)
@@ -39,7 +43,7 @@ mock.expects('get').withArgs(queryString, queryParams).yields(null, "");
 //second attempt get test
 // test('GET /food', function (assert) {
 // 	console.log(app.address); //undefined; app.address() is not a function
-//   request(mock.app) //app.address undefined when using mock.app; not a function with just mock
+//   request(db.app) //app.address undefined when using db.app; not a function with just db
 //     .get('/food')
 //     .expect(200)
 //     .expect('Content-Type', /json/)
@@ -57,5 +61,5 @@ mock.expects('get').withArgs(queryString, queryParams).yields(null, "");
 
 //actually gets 404 and returns "There has been an error connecting to the database"
 
-//mock.verify()
-//mock.restore()
+db.verify()
+db.restore()
