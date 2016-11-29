@@ -65,4 +65,4 @@ app.listen(PORT);
 console.log('Running a server on port: ' + PORT);
 
 //expose app for testing
-module.exports = mock;
+module.exports = app;

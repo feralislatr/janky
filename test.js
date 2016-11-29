@@ -5,9 +5,8 @@ var request = require('supertest');
 var app = require('./food');
 ///
 var sinon = require('sinon');
-var mock;
+var mock = sinon.mock(app);
 
-mock = sinon.mock(app);
 //var queryString = 'SELECT * FROM food'
 //var queryParams = ""
 //mock.expects('query').with(queryString, queryParams).yields(null, rows);
@@ -40,7 +39,7 @@ mock = sinon.mock(app);
 //second attempt get test
 test('GET /food', function (assert) {
 	console.log(app.address); //undefined; app.address() is not a function
-  request(mock) //maybe mock.app?
+  request(mock.app) //maybe mock.app?
     .get('/food')
     .expect(200)
     .expect('Content-Type', /json/)
