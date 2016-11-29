@@ -39,6 +39,7 @@ mock = sinon.mock(app);
 
 //second attempt get test
 test('GET /food', function (assert) {
+	console.log(app.address());
   request(mock) //maybe mock.app?
     .get('/food')
     .expect(200)
