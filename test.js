@@ -39,7 +39,7 @@ mock = sinon.mock(app);
 
 //second attempt get test
 test('GET /food', function (assert) {
-	console.log(app.address);
+	console.log(app.address); //undefined; app.address() is not a function
   request(mock) //maybe mock.app?
     .get('/food')
     .expect(200)

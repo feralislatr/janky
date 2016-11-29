@@ -61,8 +61,11 @@ var child = exec("./node_modules/.bin/pg-migrate up", function (error, stdout, s
   }
 });
 
-app.listen(PORT);
-console.log('Running a server on port: ' + PORT);
 
 //expose app for testing
 module.exports = app;
+
+app.listen(PORT);
+console.log('Running a server on port: ' + PORT);
+
+
