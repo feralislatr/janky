@@ -73,9 +73,11 @@ test('GET /food', function (assert) {
 	    client.query('SELECT * FROM food', function (err, data) {
 	    	if (err){
 	    		done(err);
+	    	} else{
+	    		console.log(data);
+	        	done();
 	    	}
-	        console.log(data);
-	        done();
+	        
 	    });
 	});
 
