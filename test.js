@@ -71,6 +71,9 @@ test('GET /food', function (assert) {
 
 	pgtest.connect('food', function (err, client, done) {
 	    client.query('SELECT * FROM food', function (err, data) {
+	    	if (err){
+	    		done(err);
+	    	}
 	        console.log(data);
 	        done();
 	    });
