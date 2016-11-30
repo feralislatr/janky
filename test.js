@@ -67,7 +67,6 @@ test('GET /food', function (assert) {
 		[ 'greens', 'jake', '9', 'veg' ],
 	    [ 'potatoes', 'tonka', '8', 'starch' ],
 	    [ 'tomatoes', 'rocko' , '7','fruit' ]
-		done();
 	]);
 
 	pgtest.connect('food', function (err, client, done) {
