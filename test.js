@@ -6,7 +6,7 @@ var app = require('./food');
 ///
 var pgtest = require('pgtest');
 //var sinon = require('sinon');
-var db = sinon.mock(app);
+//var db = sinon.mock(app);
 
 
 //first attempt get test
