@@ -67,7 +67,7 @@ test('GET /food', function (assert) {
 		[ 'greens', 'jake', '9', 'veg' ],
 	    [ 'potatoes', 'tonka', '8', 'starch' ],
 	    [ 'tomatoes', 'rocko' , '7','fruit' ]
-
+		done();
 	]);
 
 	pgtest.connect('food', function (err, client, done) {
@@ -85,6 +85,6 @@ test('GET /food', function (assert) {
 });
 
 //actually gets 404 and returns "There has been an error connecting to the database"
-pgtest.done();
+
 pgtest.check();
 
