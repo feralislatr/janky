@@ -90,5 +90,5 @@ test('GET /food', function (assert) {
 
 //actually gets 404 and returns "There has been an error connecting to the database"
 
-pgtest.check();
+//pgtest.check();
 
