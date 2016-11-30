@@ -4,6 +4,7 @@ var test = require('tape');
 //var request = require('supertest');
 var app = require('./food');
 ///
+var pg = require('pg');
 var pgtest = require('pgtest');
 //var sinon = require('sinon');
 //var db = sinon.mock(app);
@@ -70,6 +71,7 @@ test('GET /food', function (assert) {
 	]);
 
 	pgtest.connect('food', function (err, client, done) {
+		var client = new pg.Client();
 	    client.query('SELECT * FROM food', function (err, data) {
 	    	if (err){
 	    		done(err);
@@ -83,12 +85,13 @@ test('GET /food', function (assert) {
 
 
 
-	//assert.error(err, 'No error');
+	//assert.error(err, 'No error'); //err isnt defined
   //     assert.same(actualThings, expectedThings, 'Retrieve list of food');
       assert.end();
 });
 
 //actually gets 404 and returns "There has been an error connecting to the database"
 
+//must call done() somewhere, no one knows tf where though
 //pgtest.check();
 
