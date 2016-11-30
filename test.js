@@ -5,7 +5,7 @@ var test = require('tape');
 var app = require('./food');
 ///
 var pgtest = require('pgtest');
-var sinon = require('sinon');
+//var sinon = require('sinon');
 var db = sinon.mock(app);
 
 
@@ -85,5 +85,6 @@ test('GET /food', function (assert) {
 });
 
 //actually gets 404 and returns "There has been an error connecting to the database"
-
+pgtest.done();
 pgtest.check();
+
