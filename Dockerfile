@@ -10,7 +10,7 @@ COPY food.js /usr/src/app/
 COPY test.js /usr/src/app/
 COPY migrations /usr/src/app/migrations
 RUN npm install
+RUN node -c food.js
 
-RUN npm start
 EXPOSE 8080
 CMD [ "npm", "start" ]
