@@ -40,9 +40,12 @@ var pgtest = require('pgtest');
 //     });
 // });
 
+
+//just make array of things 
+
 //second attempt get test
 //mock with pgtest in here
-test('GET /food', function (assert) {
+//test('GET /food', function (assert) {
 	//console.log(app.address); //undefined; app.address() is not a function
   // request(expect) //app.address undefined when using db.app; not a function with just db
   //   .get('/food')
@@ -83,12 +86,13 @@ test('GET /food', function (assert) {
 	    });
 	});
 
+	pgtest.check();
 
 
 	//assert.error(err, 'No error'); //err isnt defined
   //     assert.same(actualThings, expectedThings, 'Retrieve list of food');
-      assert.end();
-});
+//      assert.end();
+//});
 
 //actually gets 404 and returns "There has been an error connecting to the database"
 
