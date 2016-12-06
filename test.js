@@ -86,8 +86,6 @@ var pgtest = require('pgtest');
 	    });
 	});
 
-	pgtest.check();
-
 
 	//assert.error(err, 'No error'); //err isnt defined
   //     assert.same(actualThings, expectedThings, 'Retrieve list of food');
