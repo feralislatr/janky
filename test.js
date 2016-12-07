@@ -6,7 +6,9 @@ var equals = require('array-equal')
 
 
 var queries = [
-	'SELECT * FROM food','INSERT INTO food VALUES "potatoes", "tonka", "8", "starch"', 'DELETE FROM food WHERE name="beans"']
+	'SELECT * FROM food','INSERT INTO food VALUES "potatoes", "tonka", "8", "starch"', 'DELETE FROM food WHERE name="beans"'
+]
+
 //SELECT
 pgtest.expect(queries[0]).returning(null, [
     [ 'beans', 'raplh', '10', 'protein' ],
@@ -43,6 +45,7 @@ pgtest.expect(queries[1] ).returning(null, [
 	[ "potatoes", "tonka", "8", "starch" ]
 ]);
 
+//expected result
 testdata = {rows:[
 	[ 'beans', 'raplh', '10', 'protein' ],
     [ 'greens', 'jake', '9', 'veg' ],
