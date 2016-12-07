@@ -11,17 +11,14 @@
     "license": "MIT",
     "scripts": {
         "start": "node food.js",
-        "test": "tape test.js"
+        "test": "node test.js"
     },
     "dependencies": {
         "express": "^4.13.3",
-        "pg": "^4.3.0",
         "node-pg-migrate": "^0.0.10",
-        "mocha": "^3.1.2",
-        "tape": "^4.6.3",
-        "supertest": "^2.0.1",
-        "pgtest": "^0.2.0",
-        "dotenv": "^2.0.0"
+        "assert": "^1.4.1",
+        "array-equal":"^1.0.0",
+        "pgtest": "^0.2.0"
         
     }
 }
