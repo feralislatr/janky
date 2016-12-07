@@ -6,7 +6,7 @@
     "main": "food.js",
     "repository": {
       "type": "git",
-      "url": "git@csp-github.micropaas.io:Pipeline/nodejs-food-service.git"
+      "url": "git@csp-github.micropaas.io:BAH-GSA-IAE/nodejs-food-service-2.0.git"
     },
     "license": "MIT",
     "scripts": {
