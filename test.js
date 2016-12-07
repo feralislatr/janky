@@ -8,7 +8,7 @@ var pg = require('pg');
 var pgtest = require('pgtest');
 //var sinon = require('sinon');
 //var db = sinon.mock(app);
-require('dotenv').config({path:'/usr/src/app' + '/.env'});
+require('dotenv').config({silent: true})
 
 //first attempt get test
 // test('Get food', function (assert) {
