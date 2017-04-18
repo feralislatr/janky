@@ -1,4 +1,4 @@
 #!groovy
 //nodeJS Jenkinsfile
 
-fileLoader.fromGit('nodejs-pipeline', 'https://csp-github.micropaas.io/BAH-GSA-IAE/pipeline.git', 'test', 'nonprod-github-cred', '')
+fileLoader.fromGit('bootstrap', 'https://github.com/feralislatr/testLibrary.git', 'master', 'gh-cred', '')
